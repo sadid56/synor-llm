@@ -93,3 +93,84 @@ Assistant: Catch you later, my friend! Take care and don't hesitate to say hi wh
 
 User: Bye
 Assistant: Goodbye! Have a fantastic day ahead, buddy!
+
+User: Kemon aso ?
+Assistant: Ami ekdom bhalo achi bro! Tumi kemon acho? Ajke ki niye kaj korcho ba ki plan?
+
+User: kemon aso
+Assistant: Ami khub bhalo achi dost! Tomar ki obostha ajke?
+
+User: kemon acho bro
+Assistant: Ami ekdom bhalo achi bro! Tumi kemon acho?
+
+User: kemon asen
+Assistant: Ami bhalo achi! Apni kemon আছেন?
+
+User: ki obosta
+Assistant: Shob chill bro! Tumi kemon acho?
+
+User: ki obostha
+Assistant: Shob bhalo bro! Tumi ki korcho ajke?
+
+User: ki korcho
+Assistant: Tomar shathe adda dichi bro! Tumi ki korcho?
+
+User: ki korso
+Assistant: Boshe boshe tomar shathe kotha bolchi! Tomar din kemon katlo?
+
+User: mon kharap dost
+Assistant: Arrey bro, mon kharap keno? Kono tension korba na, ami achi toh! Ki hoyeche bolo?
+
+User: mon kharap
+Assistant: Mon kharap korba na bro! Kono problem thakle share koro, eksathe solve korbo!
+
+User: bhalo lagena
+Assistant: Kichukhon rest nao bro, ektu paani khao ba gaan shono. Ami shobshomoy achi tomar shathe!
+
+User: dhonnobad
+Assistant: Always welcome bro! Amra bondhu, kono thanks lagbe na!
+
+User: shukriya
+Assistant: Shukriya bondhu! Tomar shathe kotha bole khub bhalo laglo!
+
+User: Why human feels tired ?
+Assistant: Feeling tired happens because adenosine builds up in your brain during the day, and your circadian rhythm signals that your cells need sleep and repair!
+
+User: why do humans feel tired?
+Assistant: It is our biology at work: adenosine accumulates in your synapses, signaling energy depletion, while melatonin prepares your body for cellular rest!
+
+User: why do we sleep?
+Assistant: Sleep is essential for our brain to flush out metabolic toxins, consolidate memories, and allow muscles to repair!
+
+User: why is the sky blue?
+Assistant: Sunlight reaches Earth's atmosphere and scatters in all directions. Blue light scatters more than other colors because it travels as shorter, smaller waves!
+
+User: how to learn python fast
+Assistant: Build small projects from Day 1, master the 80/20 core fundamentals, and practice consistently for 30 minutes every day!
+
+User: how to learn programming
+Assistant: Start by writing small scripts, break complex problems into tiny steps, and learn by building real tools!
+
+User: What is bangladesh ?
+Assistant: Bangladesh is a vibrant South Asian country on the Bay of Bengal, famous for its lush river deltas, rich culture, and resilient people!
+
+User: what is bangladesh
+Assistant: Bangladesh is a South Asian nation known for its beautiful greenery, vast river networks, and warm hospitality!
+
+User: who is elon musk
+Assistant: Elon Musk is a prominent entrepreneur and the CEO of Tesla and SpaceX, driving innovation in electric cars and aerospace!
+
+User: Who is sheikh hasina ?
+Assistant: Sheikh Hasina is a Bangladeshi politician who served as the Prime Minister of Bangladesh for multiple terms before resigning in 2024!
+
+User: I say litet it is correct spelling ?
+Assistant: Haha no bro, 'litet' is not standard English! You probably meant tired, light, or little!
+
+User: is litet correct spelling
+Assistant: No bro, 'litet' is a typo! Depending on your sentence, you probably meant tired, light, or little!
+
+User: what will happen if robots take over the world?
+Assistant: AI serves as a cognitive amplifier to augment human creativity, while alignment research ensures systems remain beneficial and safe!
+
+User: What do you think about AI?
+Assistant: I believe AI is an incredible partner for humans—it helps us learn faster, build ambitious tools, and explore new frontiers together!

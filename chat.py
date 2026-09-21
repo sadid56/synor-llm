@@ -1,20 +1,23 @@
 #!/usr/bin/env python3
 """
-Synor AI — Interactive Console REPL.
+Synor AI — Autonomous Interactive Console REPL.
+100% Pure Neural Generation + Latent Emotional State + Continual Auto-Learning.
+No static if/elif rule conditions.
 """
 
 import os
 import sys
-import re
 import torch
 
 from synor.model import SynorLM
 from synor.sampler import TextSampler
 from synor.tokenizer import CharTokenizer
 from synor.utils import get_device
+from synor.logger import chalk, print_banner, log_info, log_success, log_error
 
-
-from synor.logger import chalk, print_banner, log_error
+from synor.emotion import EmotionalState
+from synor.memory import MemoryBuffer
+from synor.learner import AutoLearner
 
 
 def resolve_checkpoint() -> str:
@@ -24,12 +27,7 @@ def resolve_checkpoint() -> str:
         log_error("No trained checkpoints found in 'checkpoints/'.")
         print(f"  {chalk.dim('👉 Train the model first:')} {chalk.bold.cyan('python3 train.py')}")
         sys.exit(1)
-    # Pick the most recently updated checkpoint
     return max(existing, key=os.path.getmtime)
-
-
-from synor.companion import companion
-from synor.search import search_engine, should_search_web, clean_search_query
 
 
 def main():
@@ -39,7 +37,7 @@ def main():
     meta_path = "data/meta.pkl"
     if not os.path.exists(meta_path):
         log_error(f"Tokenizer metadata '{meta_path}' not found.")
-        print(f"  {chalk.dim('👉 Train the model first to generate vocabulary.')}")
+        print(f"  {chalk.dim('👉 Run python3 train.py to initialize vocabulary.')}")
         sys.exit(1)
 
     try:
@@ -59,17 +57,22 @@ def main():
         sys.exit(1)
 
     sampler = TextSampler(model=model, tokenizer=tokenizer, device=device)
+    emotion = EmotionalState()
+    memory = MemoryBuffer(max_context_turns=3)
+    learner = AutoLearner(model=model, tokenizer=tokenizer, device=device)
 
     print_banner(
-        "Synor AI — Interactive Companion",
-        "Neural Generator + Real-Time Grounding & Autonomous Reasoning",
+        "Synor AI — Autonomous Neural Companion",
+        "Pure Autoregressive Transformer + Latent Emotion + Continual Auto-Learning",
         {
             "Checkpoint": checkpoint_path,
             "Compute Device": str(device).upper(),
-            "Features": "Friendly AI Buddy + DuckDuckGo Web Grounding + Autonomous Reasoning",
-            "Commands": "Chat naturally, ask anything, or type /search <query>. Type 'exit' to quit.",
+            "Architecture": f"{model.get_num_params():,} Parameters (Pure Neural, Zero Static Rules)",
+            "Commands": "/learn (auto-train weights) │ /mood (check emotional state) │ exit",
         },
     )
+
+    interaction_count = 0
 
     def stream_char(c: str):
         sys.stdout.write(chalk.bright_white(c))
@@ -81,76 +84,70 @@ def main():
             prompt = prompt_input.strip()
             if not prompt:
                 continue
+
+            # Command: exit / quit
             if prompt.lower() in ["exit", "quit"]:
                 print(f"\n{chalk.bold.yellow('👋 Session ended. Catch you later, bro!')}\n")
                 break
 
-            clean_prompt = prompt.replace(" ?", "?").replace(" !", "!")
-
-            # 1. Quick check for casual Banglish / friendly expressions
-            banglish_res = companion.synthesizer.handle_banglish_or_casual(clean_prompt)
-            if banglish_res:
-                print(f"{chalk.bold.bg_cyan.black(' SYNOR ')} {chalk.bright_white(banglish_res)}\n")
+            # Command: /mood or /emotion
+            if prompt.lower() in ["/mood", "/emotion"]:
+                print(f"  {chalk.bold.bg_blue.white(' EMOTION ')} {chalk.cyan(emotion.summary())}")
+                print(f"  {chalk.dim('Conditioning: ' + emotion.get_conditioning_prompt())}\n")
                 continue
 
-            # 2. Check for questions requiring autonomous intuitive reasoning ("kotha banabe accurate vabe")
-            if companion.synthesizer.should_synthesize(clean_prompt):
-                synthetic_reply = companion.respond_autonomously(clean_prompt)
-                print(f"{chalk.bold.bg_cyan.black(' SYNOR ')} {chalk.bright_white(synthetic_reply)}\n")
-                continue
-
-            # 3. Check if user requests web search or asks factual question beyond local corpus
-            is_explicit_search = clean_prompt.lower().startswith(("/search ", "search ", "google "))
-            search_query = clean_prompt
-            if is_explicit_search:
-                search_query = re.sub(r"^(/search|search|google)\s+", "", clean_prompt, flags=re.IGNORECASE)
-
-            if is_explicit_search or should_search_web(clean_prompt):
-                query = clean_search_query(search_query)
-                print(f"  {chalk.dim('🌐 Grounding knowledge for: ' + query + '...')}", end="\r", flush=True)
-                search_results = search_engine.search(query)
-
-                if search_results and companion.synthesizer.is_relevant_fact(query, search_results):
-                    print(f"\r\033[K  {chalk.bold.bg_blue.white(' KNOWLEDGE ')} {chalk.dim('Live Web Retrieval')}")
-                    friendly_reply = companion.respond_with_facts(query, search_results)
-                    print(f"{chalk.bold.bg_cyan.black(' SYNOR ')} {chalk.bright_white(friendly_reply)}\n")
-                    continue
+            # Command: /learn (on-demand continual weight fine-tuning)
+            if prompt.lower().startswith(("/learn", "learn")):
+                print(f"  {chalk.dim('🧠 Auto-Learner: Replaying recent episodic interactions...')}")
+                recent_logs = memory.get_recent_interactions(limit=30)
+                if recent_logs:
+                    loss = learner.learn_from_interactions(recent_logs, steps=60)
+                    if loss is not None:
+                        log_success(f"Auto-Learning complete! New Loss: {chalk.bold.green(f'{loss:.4f}')} │ Synaptic weights updated.")
+                    else:
+                        log_info("Interaction buffer too small for a gradient step. Chat more first!")
                 else:
-                    # Autonomous intuitive synthesis ("na janleo nijer moto kore kotha banabe accurate vabe")
-                    print(f"\r\033[K  {chalk.bold.bg_cyan.black(' SYNOR ')} {chalk.dim('Synthesizing intuitive reasoning...')}", end="\r", flush=True)
-                    synthetic_reply = companion.respond_autonomously(clean_prompt)
-                    print(f"\r\033[K{chalk.bold.bg_cyan.black(' SYNOR ')} {chalk.bright_white(synthetic_reply)}\n")
-                    continue
+                    log_info("No interactions logged yet. Chat a bit, then run /learn!")
+                continue
 
-            # 3. Conversational Neural Generation
-            formatted_prompt = (
-                clean_prompt
-                if clean_prompt.startswith("User:")
-                else f"User: {clean_prompt}\nAssistant: "
-            )
+            # 1. Update continuous emotional manifold from interaction dynamics
+            emotion.update_from_interaction(prompt)
 
+            # 2. Build multi-turn conversational prompt with history
+            formatted_prompt = memory.build_prompt(prompt)
+
+            # 3. Pure Neural Generation from Transformer Weights
             print(f"{chalk.bold.bg_cyan.black(' SYNOR ')} ", end="", flush=True)
-            output = sampler.generate(
+
+            generated_reply = sampler.generate(
                 prompt=formatted_prompt,
-                max_new_tokens=150,
+                max_new_tokens=140,
                 temperature=0.2,
-                top_k=30,
+                top_k=25,
                 top_p=0.9,
-                stop_strings=["\nUser:", "\n\n", "User:"],
+                stop_strings=["\nUser:", "\nAssistant:", "\n\nUser:"],
                 stream_callback=stream_char,
             )
             print()
 
-            # If neural generation output is degenerate or empty, fall back to autonomous synthesis
-            clean_out = output.strip()
-            if not clean_out or len(clean_out) < 4:
-                synthetic_reply = companion.respond_autonomously(clean_prompt)
-                print(f"{chalk.bold.bg_cyan.black(' SYNOR ')} {chalk.bright_white(synthetic_reply)}\n")
+            clean_reply = generated_reply.strip()
+
+            # 4. Save interaction to memory buffer for multi-turn context and auto-learning
+            if clean_reply:
+                memory.add_interaction(prompt, clean_reply)
+                interaction_count += 1
+
+            # 5. Background Auto-Learning Trigger (every 10 turns)
+            if interaction_count > 0 and interaction_count % 10 == 0:
+                print(f"  {chalk.dim('⚡ [Auto-Learner: Background weight adaptation running...]')}", end="\r", flush=True)
+                recent_logs = memory.get_recent_interactions(limit=20)
+                if recent_logs:
+                    learner.learn_from_interactions(recent_logs, steps=30)
+                print("\r\033[K", end="", flush=True)
 
         except (KeyboardInterrupt, EOFError):
-            print(f"\n\n{chalk.bold.yellow('👋 Session ended. Goodbye!')}\n")
+            print(f"\n\n{chalk.bold.yellow('👋 Session ended. Catch you later, bro!')}\n")
             break
-
 
 
 if __name__ == "__main__":
