@@ -142,13 +142,86 @@ class WebSearchEngine:
 search_engine = WebSearchEngine()
 
 
+def clean_search_query(prompt: str) -> str:
+    """
+    Extract clean search query by stripping conversational fillers and commands.
+    """
+    p = prompt.strip()
+    # Strip leading explicit commands
+    p = re.sub(r"^(/search|search|google|find)\s+", "", p, flags=re.IGNORECASE)
+    # Strip conversational pleasantries and lead-ins
+    p = re.sub(
+        r"^(hey\s+synor|synor|bro|dost|friend|can\s+you\s+tell\s+me|could\s+you\s+tell\s+me|tell\s+me|please\s+tell\s+me)\s+",
+        "",
+        p,
+        flags=re.IGNORECASE,
+    )
+    return p.strip()
+
+
 def should_search_web(prompt: str) -> bool:
     """
     Determine if a user prompt is asking for factual, real-world, or external knowledge.
+    Avoids searching for casual conversation or persona questions.
     """
     p = prompt.lower().strip()
-    if p.startswith(("/search", "search ", "google ", "find ", "who is ", "who was ", "what is ", "when was ", "where is ", "how to ")):
+
+    # Never trigger web search for identity, social, or friendly conversational prompts
+    conversational_exclusions = [
+        "what is your name",
+        "what's your name",
+        "whats your name",
+        "who are you",
+        "who made you",
+        "who created you",
+        "what can you do",
+        "what are you doing",
+        "what are you",
+        "how are you",
+        "how are you doing",
+        "how do you do",
+        "tell me a joke",
+        "i am bored",
+        "good night",
+        "good morning",
+        "kemon acho",
+        "ki khobor",
+        "mon kharap",
+    ]
+    if any(phrase in p for phrase in conversational_exclusions):
+        return False
+
+    if p.startswith(
+        (
+            "/search",
+            "search ",
+            "google ",
+            "find ",
+            "who is ",
+            "who was ",
+            "what is ",
+            "what was ",
+            "what will ",
+            "what if ",
+            "why do ",
+            "why is ",
+            "why does ",
+            "why are ",
+            "why ",
+            "how to ",
+            "how do ",
+            "how can ",
+            "how does ",
+            "how is ",
+            "how ",
+            "when was ",
+            "where is ",
+            "tell me about ",
+            "explain ",
+        )
+    ):
         return True
+
     triggers = [
         "ceo of",
         "founder of",
@@ -159,8 +232,13 @@ def should_search_web(prompt: str) -> bool:
         "latest news",
         "price of",
         "meaning of",
-        "who created",
         "population of",
         "history of",
+        "how does",
+        "why does",
+        "invented",
+        "discovered",
+        "distance to",
+        "speed of",
     ]
     return any(t in p for t in triggers)

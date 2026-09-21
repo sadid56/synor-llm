@@ -18,15 +18,18 @@ from synor.logger import chalk, print_banner, log_error
 
 
 def resolve_checkpoint() -> str:
-    for path in ["checkpoints/best_model.pt", "checkpoints/latest.pt"]:
-        if os.path.exists(path):
-            return path
-    log_error("No trained checkpoints found in 'checkpoints/'.")
-    print(f"  {chalk.dim('👉 Train the model first:')} {chalk.bold.cyan('python3 train.py')}")
-    sys.exit(1)
+    paths = ["checkpoints/best_model.pt", "checkpoints/latest.pt"]
+    existing = [p for p in paths if os.path.exists(p)]
+    if not existing:
+        log_error("No trained checkpoints found in 'checkpoints/'.")
+        print(f"  {chalk.dim('👉 Train the model first:')} {chalk.bold.cyan('python3 train.py')}")
+        sys.exit(1)
+    # Pick the most recently updated checkpoint
+    return max(existing, key=os.path.getmtime)
 
 
-from synor.search import search_engine, should_search_web
+from synor.companion import companion
+from synor.search import search_engine, should_search_web, clean_search_query
 
 
 def main():
@@ -58,13 +61,13 @@ def main():
     sampler = TextSampler(model=model, tokenizer=tokenizer, device=device)
 
     print_banner(
-        "Synor AI — Interactive Console",
-        "Neural Generator + Real-Time DuckDuckGo Web Grounding",
+        "Synor AI — Interactive Companion",
+        "Neural Generator + Real-Time Grounding & Autonomous Reasoning",
         {
             "Checkpoint": checkpoint_path,
             "Compute Device": str(device).upper(),
-            "Features": "Conversational Neural Model + DuckDuckGo Live Search",
-            "Commands": "Ask anything, or type /search <query>. Type 'exit' to quit.",
+            "Features": "Friendly AI Buddy + DuckDuckGo Web Grounding + Autonomous Reasoning",
+            "Commands": "Chat naturally, ask anything, or type /search <query>. Type 'exit' to quit.",
         },
     )
 
@@ -79,35 +82,47 @@ def main():
             if not prompt:
                 continue
             if prompt.lower() in ["exit", "quit"]:
-                print(f"\n{chalk.bold.yellow('👋 Session ended. Goodbye!')}\n")
+                print(f"\n{chalk.bold.yellow('👋 Session ended. Catch you later, bro!')}\n")
                 break
 
             clean_prompt = prompt.replace(" ?", "?").replace(" !", "!")
 
-            # 1. Check if user requests web search or asks factual question beyond local corpus
+            # 1. Quick check for casual Banglish / friendly expressions
+            banglish_res = companion.synthesizer.handle_banglish_or_casual(clean_prompt)
+            if banglish_res:
+                print(f"{chalk.bold.bg_cyan.black(' SYNOR ')} {chalk.bright_white(banglish_res)}\n")
+                continue
+
+            # 2. Check for questions requiring autonomous intuitive reasoning ("kotha banabe accurate vabe")
+            if companion.synthesizer.should_synthesize(clean_prompt):
+                synthetic_reply = companion.respond_autonomously(clean_prompt)
+                print(f"{chalk.bold.bg_cyan.black(' SYNOR ')} {chalk.bright_white(synthetic_reply)}\n")
+                continue
+
+            # 3. Check if user requests web search or asks factual question beyond local corpus
             is_explicit_search = clean_prompt.lower().startswith(("/search ", "search ", "google "))
             search_query = clean_prompt
             if is_explicit_search:
                 search_query = re.sub(r"^(/search|search|google)\s+", "", clean_prompt, flags=re.IGNORECASE)
 
             if is_explicit_search or should_search_web(clean_prompt):
-                print(f"  {chalk.dim('🌐 Searching DuckDuckGo for: ' + search_query + '...')}", end="\r", flush=True)
-                search_results = search_engine.search(search_query)
+                query = clean_search_query(search_query)
+                print(f"  {chalk.dim('🌐 Grounding knowledge for: ' + query + '...')}", end="\r", flush=True)
+                search_results = search_engine.search(query)
 
-                if search_results:
-                    print(f"\r\033[K  {chalk.bold.bg_blue.white(' DUCKDUCKGO ')} {chalk.dim('Live Web Retrieval')}")
-                    print(f"{chalk.bold.bg_cyan.black(' SYNOR ')} {chalk.bright_white(search_results)}\n")
+                if search_results and companion.synthesizer.is_relevant_fact(query, search_results):
+                    print(f"\r\033[K  {chalk.bold.bg_blue.white(' KNOWLEDGE ')} {chalk.dim('Live Web Retrieval')}")
+                    friendly_reply = companion.respond_with_facts(query, search_results)
+                    print(f"{chalk.bold.bg_cyan.black(' SYNOR ')} {chalk.bright_white(friendly_reply)}\n")
                     continue
                 else:
-                    # Honest admission of not knowing
-                    print(f"\r\033[K  {chalk.bold.bg_yellow.black(' DUCKDUCKGO ')} {chalk.dim('No verified web results found')}")
-                    print(
-                        f"{chalk.bold.bg_cyan.black(' SYNOR ')} "
-                        f"{chalk.yellow('আমি এই প্রশ্নের উত্তর জানি না এবং ইন্টারনেটেও খুঁজে পাইনি। (I do not know this and could not find it online.)')}\n"
-                    )
+                    # Autonomous intuitive synthesis ("na janleo nijer moto kore kotha banabe accurate vabe")
+                    print(f"\r\033[K  {chalk.bold.bg_cyan.black(' SYNOR ')} {chalk.dim('Synthesizing intuitive reasoning...')}", end="\r", flush=True)
+                    synthetic_reply = companion.respond_autonomously(clean_prompt)
+                    print(f"\r\033[K{chalk.bold.bg_cyan.black(' SYNOR ')} {chalk.bright_white(synthetic_reply)}\n")
                     continue
 
-            # 2. Conversational Neural Generation
+            # 3. Conversational Neural Generation
             formatted_prompt = (
                 clean_prompt
                 if clean_prompt.startswith("User:")
@@ -118,17 +133,19 @@ def main():
             output = sampler.generate(
                 prompt=formatted_prompt,
                 max_new_tokens=150,
-                temperature=0.3,
-                top_k=40,
+                temperature=0.2,
+                top_k=30,
                 top_p=0.9,
                 stop_strings=["\nUser:", "\n\n", "User:"],
                 stream_callback=stream_char,
             )
             print()
 
-            # If neural model output is empty or repetitive, trigger honest fallback
-            if not output.strip():
-                print(f"{chalk.bold.bg_cyan.black(' SYNOR ')} {chalk.yellow('দুঃখিত, আমি এই বিষয়ে নিশ্চিত নই। (Sorry, I am not sure about this.)')}")
+            # If neural generation output is degenerate or empty, fall back to autonomous synthesis
+            clean_out = output.strip()
+            if not clean_out or len(clean_out) < 4:
+                synthetic_reply = companion.respond_autonomously(clean_prompt)
+                print(f"{chalk.bold.bg_cyan.black(' SYNOR ')} {chalk.bright_white(synthetic_reply)}\n")
 
         except (KeyboardInterrupt, EOFError):
             print(f"\n\n{chalk.bold.yellow('👋 Session ended. Goodbye!')}\n")

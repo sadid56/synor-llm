@@ -1,0 +1,4 @@
+# Synor AI — Core Dependencies
+torch>=2.2.0
+tqdm>=4.66.0
+requests>=2.31.0
