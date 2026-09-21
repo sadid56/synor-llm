@@ -20,8 +20,6 @@ from synor.logger import (
 )
 
 from synor.emotion import EmotionalState
-from synor.memory import MemoryBuffer
-from synor.learner import AutoLearner
 from synor.search import search_engine, should_search_web
 
 # Aliases for backward compatibility
@@ -53,6 +51,4 @@ __all__ = [
     "log_error",
     "log_step",
     "EmotionalState",
-    "MemoryBuffer",
-    "AutoLearner",
 ]
