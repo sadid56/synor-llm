@@ -11,7 +11,7 @@ import torch
 
 from synor.model import SynorLM
 from synor.sampler import TextSampler
-from synor.tokenizer import CharTokenizer
+from synor.tokenizer import BaseTokenizer, CharTokenizer, load_tokenizer
 from synor.utils import get_device
 from synor.logger import chalk, print_banner, log_info, log_success, log_error
 
@@ -41,7 +41,7 @@ def main():
         sys.exit(1)
 
     try:
-        tokenizer = CharTokenizer.load(meta_path)
+        tokenizer = load_tokenizer(meta_path)
     except Exception as e:
         log_error(f"Failed to load tokenizer: {e}")
         sys.exit(1)
@@ -122,10 +122,11 @@ def main():
             generated_reply = sampler.generate(
                 prompt=formatted_prompt,
                 max_new_tokens=140,
-                temperature=0.2,
-                top_k=25,
+                temperature=0.7,
+                top_k=40,
                 top_p=0.9,
-                stop_strings=["\nUser:", "\nAssistant:", "\n\nUser:"],
+                repetition_penalty=1.15,
+                stop_strings=["\n\n", "\nUser:", "\nAssistant:", "\n\nUser:", "<|endoftext|>"],
                 stream_callback=stream_char,
             )
             print()

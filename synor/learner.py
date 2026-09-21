@@ -10,7 +10,7 @@ from torch.nn import functional as F
 from typing import List, Dict, Optional
 
 from synor.model import SynorLM
-from synor.tokenizer import CharTokenizer
+from synor.tokenizer import BaseTokenizer
 from synor.logger import chalk, log_info, log_success, log_error
 
 
@@ -23,7 +23,7 @@ class AutoLearner:
     def __init__(
         self,
         model: SynorLM,
-        tokenizer: CharTokenizer,
+        tokenizer: BaseTokenizer,
         device: torch.device,
         learning_rate: float = 1e-4,
         checkpoint_path: str = "checkpoints/best_model.pt",
@@ -37,7 +37,7 @@ class AutoLearner:
             self.model.parameters(), lr=self.learning_rate, weight_decay=0.01
         )
 
-    def learn_from_text(self, text_samples: List[str], steps: int = 40, batch_size: int = 8) -> Optional[float]:
+    def learn_from_text(self, text_samples: List[str], steps: int = 30, batch_size: int = 2) -> Optional[float]:
         """
         Execute gradient descent on the provided text samples to adapt neural weights.
         """
@@ -55,9 +55,10 @@ class AutoLearner:
 
         block_size = self.model.config.block_size
         if n <= block_size:
-            # Pad if too short
+            # Pad if too short using tokenizer's eot_token
+            eot = getattr(self.tokenizer, "eot_token", 0)
             pad_len = block_size + 1 - n
-            data_tensor = torch.cat([data_tensor, torch.zeros(pad_len, dtype=torch.long)])
+            data_tensor = torch.cat([data_tensor, torch.full((pad_len,), eot, dtype=torch.long)])
             n = len(data_tensor)
 
         self.model.train()
@@ -98,13 +99,16 @@ class AutoLearner:
             if u and a:
                 formatted_samples.append(f"User: {u}\nAssistant: {a}")
 
-        # Also include a few core conversations from raw data to prevent catastrophic forgetting
-        try:
-            with open("data/raw/conversations.txt", "r", encoding="utf-8") as f:
-                core_dialogues = f.read()
-                formatted_samples.append(core_dialogues[:1500])
-        except Exception:
-            pass
+        # Include core conversations from SFT or raw data to prevent catastrophic forgetting
+        for replay_path in ["data/sft/dialogues.txt", "data/raw/conversations.txt"]:
+            if os.path.exists(replay_path):
+                try:
+                    with open(replay_path, "r", encoding="utf-8") as f:
+                        core_dialogues = f.read()
+                        formatted_samples.append(core_dialogues[:2500])
+                    break
+                except Exception:
+                    pass
 
         return self.learn_from_text(formatted_samples, steps=steps)
 

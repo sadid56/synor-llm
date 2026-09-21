@@ -79,6 +79,10 @@ class Trainer:
                 losses[k] = loss.item()
             out[split] = losses.mean().item()
         self.model.train()
+        if self.device.type == "mps":
+            torch.mps.empty_cache()
+        elif self.device.type == "cuda":
+            torch.cuda.empty_cache()
         return out
 
     def save_checkpoint(self, filename: str) -> str:
@@ -116,6 +120,7 @@ class Trainer:
         eval_interval: int = 200,
         eval_iters: int = 20,
         grad_clip: float = 1.0,
+        grad_accum_steps: int = 1,
     ) -> None:
         start_iter = self.iter_num
         max_iters = start_iter + additional_iters
@@ -133,19 +138,27 @@ class Trainer:
                 for param_group in self.optimizer.param_groups:
                     param_group["lr"] = lr
 
-                # Fetch batch and forward pass
-                x, y = self.dataset.get_batch(
-                    "train", batch_size, self.model.config.block_size, str(self.device)
-                )
-
                 self.optimizer.zero_grad(set_to_none=True)
-                _, loss = self.model(x, y)
-                loss.backward()
+                for _ in range(grad_accum_steps):
+                    x, y = self.dataset.get_batch(
+                        "train", batch_size, self.model.config.block_size, str(self.device)
+                    )
+                    _, loss = self.model(x, y)
+                    if grad_accum_steps > 1:
+                        loss = loss / grad_accum_steps
+                    loss.backward()
 
                 if grad_clip > 0.0:
                     clip_grad_norm_(self.model.parameters(), grad_clip)
 
                 self.optimizer.step()
+
+                # Periodic cache cleanup to prevent MPS / CUDA memory fragmentation
+                if (step + 1) % 5 == 0:
+                    if self.device.type == "mps":
+                        torch.mps.empty_cache()
+                    elif self.device.type == "cuda":
+                        torch.cuda.empty_cache()
 
                 # Periodic evaluation and checkpointing
                 if (step + 1) % eval_interval == 0 or (step + 1) == max_iters:
@@ -158,8 +171,17 @@ class Trainer:
                         self.best_val_loss = val_loss
                         self.save_checkpoint("best_model.pt")
 
+                    # Calculate dataset progress / percentage
+                    data_pct = None
+                    if hasattr(self.dataset, "samples") and len(self.dataset.samples) > 0:
+                        total_samples_seen = (step + 1) * batch_size * grad_accum_steps
+                        data_pct = (total_samples_seen / len(self.dataset.samples)) * 100.0
+                    elif hasattr(self.dataset, "train_data") and len(self.dataset.train_data) > 0:
+                        total_tokens_seen = (step + 1) * batch_size * grad_accum_steps * self.model.config.block_size
+                        data_pct = (total_tokens_seen / len(self.dataset.train_data)) * 100.0
+
                     self.save_checkpoint("latest.pt")
-                    log_step(step + 1, max_iters, losses["train"], val_loss, lr, dt, is_best=is_best)
+                    log_step(step + 1, max_iters, losses["train"], val_loss, lr, dt, is_best=is_best, data_pct=data_pct)
                     t0 = time.time()
 
         except KeyboardInterrupt:

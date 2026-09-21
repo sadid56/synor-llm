@@ -54,6 +54,14 @@ PRESETS: Dict[str, SynorConfig] = {
         n_layer=12,
         dropout=0.1,
     ),
+    "100m": SynorConfig(
+        block_size=512,
+        vocab_size=50257,
+        n_embd=768,
+        n_head=12,
+        n_layer=10,
+        dropout=0.1,
+    ),
 }
 
 

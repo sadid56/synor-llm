@@ -46,6 +46,7 @@ class TextSampler:
             idx = torch.zeros((1, 1), dtype=torch.long, device=self.device)
 
         generated_tokens = []
+        stream_buffer = ""
 
         for _ in range(max_new_tokens):
             # Crop to block_size if sequence exceeds context window
@@ -95,19 +96,66 @@ class TextSampler:
                 next_token = torch.multinomial(probs, num_samples=1)
 
             token_id = next_token.item()
+            eot = getattr(self.tokenizer, "eot_token", None)
+            if eot is not None and token_id == eot:
+                break
+
             generated_tokens.append(token_id)
             idx = torch.cat((idx, next_token), dim=1)
 
             char = self.tokenizer.decode([token_id])
 
-            if stop_strings:
+            if stream_callback:
+                stream_buffer += char
+                should_stop = False
+                for stop in (stop_strings or []):
+                    if stop in stream_buffer:
+                        before_stop = stream_buffer.split(stop)[0]
+                        if before_stop:
+                            stream_callback(before_stop)
+                        stream_buffer = ""
+                        should_stop = True
+                        break
+                if should_stop:
+                    break
+
+                # Check if suffix of stream_buffer is a prefix of any stop string
+                overlap = 0
+                if stop_strings:
+                    for length in range(len(stream_buffer), 0, -1):
+                        suffix = stream_buffer[-length:]
+                        if any(s.startswith(suffix) for s in stop_strings):
+                            overlap = length
+                            break
+
+                if overlap > 0:
+                    to_emit = stream_buffer[:-overlap]
+                    stream_buffer = stream_buffer[-overlap:]
+                else:
+                    to_emit = stream_buffer
+                    stream_buffer = ""
+
+                if to_emit:
+                    if to_emit.endswith("\n\n\n"):
+                        break
+                    stream_callback(to_emit)
+                    if delay_seconds > 0:
+                        time.sleep(delay_seconds)
+            elif stop_strings:
                 decoded_so_far = self.tokenizer.decode(generated_tokens)
                 if any(stop in decoded_so_far for stop in stop_strings):
                     break
 
-            if stream_callback:
-                stream_callback(char)
-                if delay_seconds > 0:
-                    time.sleep(delay_seconds)
+        # Flush any remaining buffer if not stopped by a stop string
+        if stream_callback and stream_buffer:
+            if not any(stop in stream_buffer for stop in (stop_strings or [])):
+                stream_callback(stream_buffer)
 
-        return self.tokenizer.decode(generated_tokens)
+        full_output = self.tokenizer.decode(generated_tokens)
+        if stop_strings:
+            for stop in stop_strings:
+                if stop in full_output:
+                    full_output = full_output.split(stop)[0]
+        import re
+        full_output = re.sub(r'\n{3,}', '\n\n', full_output)
+        return full_output

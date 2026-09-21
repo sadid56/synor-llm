@@ -10,7 +10,7 @@ import torch
 
 from synor.model import SynorLM
 from synor.sampler import TextSampler
-from synor.tokenizer import CharTokenizer
+from synor.tokenizer import BaseTokenizer, CharTokenizer, load_tokenizer
 from synor.utils import get_device
 
 
@@ -58,7 +58,7 @@ def main():
         sys.exit(1)
 
     try:
-        tokenizer = CharTokenizer.load(meta_path)
+        tokenizer = load_tokenizer(meta_path)
     except Exception as e:
         log_error(f"Failed to load tokenizer: {e}")
         sys.exit(1)
@@ -101,6 +101,7 @@ def main():
             temperature=args.temp,
             top_k=args.top_k,
             top_p=args.top_p,
+            stop_strings=["\n\n", "\nUser:", "\nAssistant:", "<|endoftext|>"],
             stream_callback=stream_char,
         )
     except KeyboardInterrupt:

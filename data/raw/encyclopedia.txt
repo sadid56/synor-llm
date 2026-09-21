@@ -6,16 +6,57 @@ Artificial intelligence (AI) is the capability of computational systems to perfo
 Machine learning (ML) is a field of study in artificial intelligence concerned with the development and study of statistical algorithms that can learn from data and generalize to unseen data, and thus perform tasks without being explicitly programmed.
 
 
+# Deep learning
+In machine learning, deep learning (DL) focuses on utilizing multilayered neural networks to perform tasks such as classification, regression, and representation learning. The field takes inspiration from biological neuroscience and revolves around stacking artificial neurons into layers and "training" them to process data. The adjective "deep" refers to the use of multiple layers in the network. Methods used can be supervised, semi-supervised or unsupervised.
+
+
 # Computer
 A computer is a machine that can be programmed to automatically carry out sequences of arithmetic or logical operations (computation). Modern digital electronic computers can perform generic sets of operations known as programs, which enable computers to perform a wide range of tasks. The term computer system may refer to a nominally complete computer that includes the hardware, operating system, software, and peripheral equipment needed and used for full operation, or to a group of computers that are linked and function together, such as a computer network or computer cluster.
+
+
+# Algorithm
+In mathematics and computer science, an algorithm is any well-defined set of instructions that when followed terminates after a finite number of steps that comprise a solution to a given computational problem. Advanced algorithms may utilize loops and involve many conditionals that decide the next step based on the inputs provided, resulting in long sequences of steps before halting, but all algorithms terminate by definition.
+
+
+# Data structure
+In computer science, a data structure is a way to organize and store data that is usually chosen for efficient access to data. More precisely, a data structure is the physical implementation of a data type, including specifications of the data organization and storage format, as well as functions or operations for working with this data. Data structures are closely related to abstract data types (ADTs). The data structure describes the representation of data in memory and how operations are carried out, while the ADT describes the logical form or algebraic structure of the data type—what operations are allowed and what results they produce—without describing how those operations are implemented. Some authors do not use the term "abstract data type" and simply refer to the logical and physical forms of the data structure.
 
 
 # Python (programming language)
 Python is a high-level, general-purpose programming language that emphasizes code readability, simplicity, and ease-of-writing with the use of significant indentation, an extensive ("batteries-included") standard library, and garbage collection. Python supports multiple programming paradigms but with an emphasis on object-oriented programming and dynamic typing.
 
 
+# Operating system
+An operating system (OS) is system software that manages computer hardware and software resources, and provides common services for computer programs.
+
+
+# Computer network
+In computer science, computer engineering, and telecommunications, a network is a group of communicating computers and peripherals known as hosts, which communicate data to other hosts via communication protocols, as facilitated by networking hardware.
+
+
+# Database
+In computing, a database is an organized collection of data or a type of data store based on the use of a database management system (DBMS), the software that interacts with end users, applications, and the database itself to capture and analyze the data. The DBMS additionally encompasses the core facilities provided to administer the database. The sum total of the database, the DBMS and the associated applications can be referred to as a database system. Often the term "database" is also used loosely to refer to any of the DBMS, the database system or an application associated with the database.
+
+
 # Physics
 Physics is the scientific study of matter, its fundamental constituents, its motion and behavior through space and time, and the related entities of energy and force. It is one of the most fundamental scientific disciplines. A scientist who specializes in the field of physics is called a physicist.
+
+
+# Light
+Light, visible light, or visible radiation is electromagnetic radiation that can be perceived by the human eye. Visible light spans the visible spectrum and is usually defined as having wavelengths in the range of 400–700 nanometers (nm), corresponding to frequencies of 750–420 terahertz. The visible band sits adjacent to the infrared and the ultraviolet, called collectively optical radiation.
+
+
+# Optics
+Optics is the branch of physics that studies the behaviour, manipulation, and detection of electromagnetic radiation, including its interactions with matter and instruments that use or detect it. Optics usually describes the behaviour of visible, ultraviolet, and infrared light. The study of optics extends to other forms of electromagnetic radiation, including radio waves, microwaves, 
+and X-rays. The term optics is also applied to technology for manipulating beams of elementary charged particles.
+
+
+# Thermodynamics
+Thermodynamics is a branch of physics that deals with heat, work, and temperature, and their relation to energy, entropy, and the physical properties of matter and radiation. The behavior of these quantities is governed by the four laws of thermodynamics, which convey a quantitative description using measurable macroscopic physical quantities but may be explained in terms of microscopic constituents by statistical mechanics. Thermodynamics applies to various topics in science and engineering, especially physical chemistry, biochemistry, chemical engineering, and mechanical engineering, as well as other complex fields such as meteorology.
+
+
+# Quantum mechanics
+Quantum mechanics, also known as quantum physics, is the fundamental physical theory that describes the behavior of matter and of light; the behaviors it models typically occur at and below the scale of atoms, and have often been described as counterintuitive. Its concepts and methods have been applied across many disciplines, including quantum chemistry, quantum biology, quantum field theory, quantum technology, and quantum information science.
 
 
 # Solar System
@@ -26,8 +67,36 @@ The Solar System is the gravitationally bound system of the Sun and the masses t
 Earth is the third planet from the Sun and the only astronomical object known to harbor life. This is made possible by Earth being an ocean world, the only one in the Solar System sustaining liquid surface water. Almost all of Earth's water is contained in its ocean, which covers 70.8% of Earth's crust. The remaining 29.2% of Earth's crust is land, which is predominantly located within Earth's land hemisphere in the form of continental landmasses. Most of Earth's land is at least somewhat humid and covered by vegetation, while large ice sheets at Earth's polar deserts retain more water than Earth's groundwater, lakes, rivers, and atmospheric water combined. Earth's crust consists of slowly moving tectonic plates, which interact to produce mountain ranges, volcanoes, and earthquakes. Earth has a liquid outer core that generates a magnetosphere capable of deflecting most of the destructive solar winds and cosmic radiation.
 
 
+# Sun
+The Sun is the star located at the centre of the Solar System. It is a massive sphere of hot plasma, heated to incandescence by nuclear fusion reactions in its core, radiating the energy from its surface mainly as visible light and infrared radiation with 10% at ultraviolet energies. It is the main source of energy for life on Earth. The Sun has been an object of veneration in many cultures and a central subject of astronomical research since antiquity.
+
+
+# Moon
+The Moon is the only natural satellite of Earth. It orbits Earth at an average distance of 384,399 kilometers (238,854 mi). Because the Moon follows an elliptical path, its distance from Earth varies over the year, ranging from 357,000–407,000 kilometers (222,000–253,000 mi), a distance roughly 30 times the width of Earth. It completes an orbit in relation to Earth and the Sun (synodically) every 29.5 days. The Moon and Earth are bound by gravitational attraction, which is stronger on the sides facing each other. The resulting tidal forces are the main driver of Earth's tides, and have pulled the Moon to always face Earth with the same near side. This tidal locking effectively synchronizes the Moon's rotation period to its orbital period.
+
+
 # Human
 Humans are the most abundant and widespread species of primates, characterized by bipedalism, minimal body hair, and large, complex brains enabling the development of advanced technology, culture, and language. Humans are highly social beings and tend to live in complex social structures composed of many cooperating and competing groups, from families and kinship networks to political states. Social interactions between humans have established a wide variety of values, social norms, and rituals, which bolster human society. Curiosity and the human desire to understand and influence the environment have motivated humanity's development of science, philosophy, religion, mythology, and other fields of knowledge.
+
+
+# Brain
+The brain is an organ that serves as the center of the nervous system in all vertebrate and most invertebrate animals. It consists of nervous tissue and is typically located in the head (cephalization), usually near organs for special senses such as vision, hearing, and olfaction. Being the most specialized organ, it is responsible for receiving information from the sensory nervous system, processing that information and the coordination of motor control and the endocrine system.
+
+
+# Neuron
+A neuron, neurone, or nerve cell, is a cell that is excitable, firing electric signals called action potentials. Neurons form neural networks in the nervous system, mainly in the central nervous system. Neurons receive and conduct impulses. They communicate with other cells via synapses, which are specialized connections that commonly use minute amounts of chemical neurotransmitters to pass the electric signal from the presynaptic neuron to the target cell through the synaptic gap.
+
+
+# Sleep
+Sleep is a state of reduced mental and physical activity in which consciousness is altered and certain sensory activity is inhibited. During sleep, there is a marked decrease in muscle activity and interactions with the surrounding environment. While sleep differs from wakefulness in terms of the ability to react to stimuli, it still involves active brain patterns, making it more reactive than a coma or disorders of consciousness.
+
+
+# Adenosine
+Adenosine (symbol A) is an organic compound that occurs widely in nature in the form of diverse derivatives. The molecule consists of an adenine attached to a ribose via a β-N9-glycosidic bond. Adenosine is one of the four nucleoside building blocks of RNA (and its derivative deoxyadenosine is a building block of DNA), which are essential for all life on Earth. Its derivatives include the energy carriers adenosine mono-, di-, and triphosphate, also known as AMP/ADP/ATP. Cyclic adenosine monophosphate (cAMP) is pervasive in signal transduction. Adenosine is used as an intravenous medication for some cardiac arrhythmias.
+
+
+# Circadian rhythm
+A circadian rhythm, or circadian cycle, is a natural oscillation that repeats roughly every 24 hours. Circadian rhythms can refer to any process that originates within an organism and responds to the environment. Circadian rhythms are regulated by a circadian clock whose primary function is to rhythmically co-ordinate biological processes so they occur at the correct time to maximize the fitness of an individual. Circadian rhythms have been widely observed in animals, plants, fungi and cyanobacteria and there is evidence that they evolved independently in each of these kingdoms of life.
 
 
 # Language
@@ -46,6 +115,10 @@ Mathematics is a field of knowledge concerned with abstract concepts such as num
 The Internet is the global system of interconnected computer networks that uses the Internet protocol suite (TCP/IP) to communicate between networks and devices. It is a network of networks that comprises private, public, academic, business, and government networks of local to global scope, linked by electronic, wireless, and optical networking technologies. The Internet carries a vast range of information services and resources, such as the interlinked hypertext documents and applications of the World Wide Web (WWW), electronic mail, discussion groups, internet telephony, streaming media and file sharing.
 
 
+# World Wide Web
+The World Wide Web is a global interconnected information system that enables content sharing over the Internet. It facilitates access to documents and other web resources according to specific rules of the Hypertext Transfer Protocol (HTTP).
+
+
 # World history (disambiguation)
 World history or history of the world usually refers to human history, the history of human beings that takes a human perspective.
 
@@ -57,3 +130,45 @@ Science is a systematic discipline that builds and organises knowledge in the fo
 
 # Biology
 Biology is the scientific study of life and living organisms. It is a broad natural science that encompasses a wide range of fields and unifying principles that explain the structure, function, growth, origin, evolution, and distribution of life. Central to biology are five fundamental themes: the cell as the basic unit of life, genes and heredity as the basis of inheritance, evolution as the driver of biological diversity, energy transformation for sustaining life processes, and homeostasis, the maintenance of internal stability.
+
+
+# Evolution
+Evolution is the change in the heritable characteristics of biological populations over successive generations. It occurs when evolutionary processes such as genetic drift and natural selection act on genetic variation, resulting in certain characteristics becoming more or less common within a population over successive generations. The process of evolution has given rise to biodiversity at every level of biological organisation.
+
+
+# Genetics
+Genetics is the study of genes, genetic variation, and heredity in organisms. It is an important branch in biology because heredity is vital to organisms' evolution. Gregor Mendel, a Moravian Augustinian friar working in the 19th century in Brno, was the first to study genetics scientifically. Mendel studied "trait inheritance", patterns in the way traits are handed down from parents to offspring over time. He observed that organisms inherit traits by way of discrete "units of inheritance". This term, still used today, is a somewhat ambiguous definition of what is referred to as a gene.
+
+
+# Bangladesh
+Bangladesh, officially the People's Republic of Bangladesh, is a country in South Asia. It is the eighth-most populous country in the world with a population of almost 177.8 million people within an area of 148,461 square kilometres (57,321 sq mi). Bangladesh shares land borders with India to the north, west, and east, and Myanmar to the southeast. It has a coastline along the Bay of Bengal to its south and is separated from Bhutan and Nepal by the Siliguri Corridor, and from China by the Indian states of West Bengal and Sikkim to its north. Dhaka, the capital and largest city, is the nation's political, financial, and cultural centre. Chittagong is the second-largest city and the busiest port of the country.
+
+
+# Dhaka
+Dhaka, formerly spelled as Dacca, is the capital and largest city of Bangladesh. With an estimated population of 36.6 million, Dhaka is the second largest city by population in the world, and is widely considered to be the most densely populated built-up urban area in the world. Dhaka is an important cultural, economic, and scientific hub of Eastern South Asia. Dhaka ranks fourth in South Asia and 55th in the world in terms of GDP. Lying on the Ganges Delta, it is bounded by the Buriganga, Turag, Dhaleshwari and Shitalakshya rivers. It is also the largest Bengali-speaking city in the world.
+
+
+# Chittagong
+Chittagong, officially Chattogram, is the capital and largest city of the Chittagong Division and Chittagong District. It is second-largest city in Bangladesh after the capital, Dhaka, and the largest city in the Greater Chittagong region, with a land area of 157 square kilometers. Home to the Port of Chittagong, it is the busiest port in Bangladesh and the Bay of Bengal. The city is also the business capital of Bangladesh. The city is located on the banks of the Karnaphuli River between the Chittagong Hill Tracts and the Bay of Bengal. In 2022, the Chittagong District had a population of approximately 9.2 million according to a census conducted by the government of Bangladesh. In 2022, the city area had a population of more than 5.6 million. The city is an important export hub, with goods such as tea, jute, and petroleum products being shipped through its port. The city is home to many large local businesses and plays an important role in the Bangladeshi economy.
+
+
+# Sundarbans
+Sundarbans is a mangrove forest area in the Ganges Delta formed by the confluence of the Ganges, Brahmaputra and Meghna Rivers in the Bay of Bengal. It spans the area from the Hooghly River in India's state of West Bengal to the Baleswar River in Bangladesh's Khulna Division. It comprises closed and open mangrove forests, land used for agricultural purpose, mudflats and barren land, and is intersected by multiple tidal streams and channels. Spread across 10,277 km2 (3,968 sq mi), it is the world's largest mangrove forest. It covers over 6,017 km2 (2,323 sq mi) in Bangladesh's Khulna Division. In West Bengal's Presidency division, they extend over 4,260 km2 (1,640 sq mi) in the South 24 Parganas and North 24 Parganas districts.
+Four protected areas in the Sundarbans are enlisted as UNESCO World Heritage Sites, viz. Sundarbans West, Sundarbans South, Sundarbans East in Bangladesh and Sundarbans National Park in India.
+The Indian Sundarbans were considered endangered in a 2020 assessment under the IUCN Red List of Ecosystems framework. The most abundant tree species are sundri and gewa. The forests provide habitat to 453 fauna wildlife, including 290 bird, 120 fish, 42 mammal, 35 reptile and eight amphibian species. Despite a total ban on all killing or capture of wildlife other than fish and some invertebrates, there has been a consistent pattern of depleted biodiversity or loss of species in the 20th century, with the ecological quality of the forest declining.
+
+
+# Cox's Bazar
+Cox's Bazar is a city, fishing port, tourism centre, and the headquarters of the Cox's Bazar District and Cox's Bazar Sadar Upazila in south-eastern Bangladesh. The city has a population of about 196,000. Cox's Bazar Beach is a major tourist attraction.
+
+
+# Bengali language
+Bengali, also known by its endonym Bangla, is a classical Indo-Aryan language belonging to the Indo-Iranian branch of the Indo-European language family. It is primarily spoken by the Bengali people, native to the Bengal region as well as in Barak Valley in Assam and Tripura in South Asia. With over 242 million native speakers and another 43 million as second language speakers as of 2025, Bengali is the sixth most spoken native language and the seventh most spoken language by the total number of speakers in the world.
+
+
+# International Mother Language Day
+International Mother Language Day is a worldwide annual observance held on 21 February to promote awareness of linguistic and cultural diversity and to promote multilingualism. First announced by UNESCO on 17 November 1999, it was formally recognized by the United Nations General Assembly with the adoption of UN resolution 56/262 in 2002.
+
+
+# Software engineering
+Software engineering is a branch of both computer science and engineering focused on designing, developing, testing, and maintaining software applications. It involves applying engineering principles and computer programming expertise to develop software systems that meet user needs.

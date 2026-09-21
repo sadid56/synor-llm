@@ -114,6 +114,7 @@ def log_step(
     lr: float,
     elapsed: float,
     is_best: bool = False,
+    data_pct: Optional[float] = None,
 ) -> None:
     """Format and print an elegant training step record."""
     pct = (step / max_steps) * 100
@@ -127,8 +128,12 @@ def log_step(
 
     star = f" {chalk.bold.bright_yellow('★ New Record')}" if is_best else ""
 
+    data_str = ""
+    if data_pct is not None:
+        data_str = f" │ {chalk.dim('File:')} {chalk.bold.bright_magenta(f'{data_pct:5.1f}%')}"
+
     print(
-        f"  {chalk.bold.cyan('Step')} {chalk.yellow(progress)} │ "
+        f"  {chalk.bold.cyan('Step')} {chalk.yellow(progress)}{data_str} │ "
         f"{chalk.dim('Train:')} {train_str} │ "
         f"{chalk.dim('Val:')} {val_str} │ "
         f"{chalk.dim('LR:')} {lr_str} │ "

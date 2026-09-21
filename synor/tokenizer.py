@@ -77,3 +77,19 @@ class CharTokenizer(BaseTokenizer):
             return cls(vocab=data["chars"])
         except Exception as e:
             raise RuntimeError(f"Failed to load tokenizer from {filepath}: {e}") from e
+
+
+def load_tokenizer(filepath: str = "data/meta.pkl") -> BaseTokenizer:
+    """Unified loader that auto-detects BPETokenizer vs CharTokenizer from metadata."""
+    if not os.path.exists(filepath):
+        from synor.bpe_tokenizer import BPETokenizer
+        return BPETokenizer()
+
+    with open(filepath, "rb") as f:
+        data = pickle.load(f)
+
+    if isinstance(data, dict) and data.get("type") == "bpe":
+        from synor.bpe_tokenizer import BPETokenizer
+        return BPETokenizer.load(filepath)
+    else:
+        return CharTokenizer.load(filepath)

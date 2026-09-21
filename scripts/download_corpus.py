@@ -16,23 +16,51 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 import requests
 from synor.logger import chalk, print_banner, log_info, log_success, log_error
 
-# High-value fundamental topics across science, tech, history, logic, and philosophy
+# High-value fundamental topics across science, tech, history, logic, geography, and biology
 CURATED_TOPICS = [
     "Artificial intelligence",
     "Machine learning",
+    "Deep learning",
     "Computer",
+    "Algorithm",
+    "Data structure",
     "Python (programming language)",
+    "Operating system",
+    "Computer network",
+    "Database",
     "Physics",
+    "Light",
+    "Optics",
+    "Thermodynamics",
+    "Quantum mechanics",
     "Solar System",
     "Earth",
+    "Sun",
+    "Moon",
     "Human",
+    "Brain",
+    "Neuron",
+    "Sleep",
+    "Adenosine",
+    "Circadian rhythm",
     "Language",
     "Philosophy",
     "Mathematics",
     "Internet",
+    "World Wide Web",
     "History of the world",
     "Science",
     "Biology",
+    "Evolution",
+    "Genetics",
+    "Bangladesh",
+    "Dhaka",
+    "Chittagong",
+    "Sundarbans",
+    "Cox's Bazar",
+    "Bengali language",
+    "International Mother Language Day",
+    "Software engineering",
 ]
 
 
