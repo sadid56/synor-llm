@@ -66,3 +66,6 @@ Start a real-time conversation session with your model:
 python3 chat.py
 ```
 Type your prompt and press **Enter**. Type `exit` or `quit` to end the session.
+
+### 🌐 Live Web Search & Grounding
+Inside `chat.py`, you can ask real-time or factual questions (e.g., `"who is the CEO of Google"`, `"capital of France"`, or explicitly `"/search <query>"`). Synor automatically searches DuckDuckGo and Wikipedia in real time, retrieves verified information, and honestly admits if no information could be found.

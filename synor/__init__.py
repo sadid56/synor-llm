@@ -19,6 +19,8 @@ from synor.logger import (
     log_step,
 )
 
+from synor.search import search_engine, should_search_web
+
 # Aliases for backward compatibility
 MiniGPT = SynorLM
 GPTConfig = SynorConfig
