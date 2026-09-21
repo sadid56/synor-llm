@@ -1,36 +1,68 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🧠 Synor LLM
 
-## Getting Started
+**Synor** is a from-scratch, production-grade Generative Pretrained Transformer (Causal Decoder LLM) built in Python and PyTorch. It implements the core architecture behind modern generative models like GPT and Gemini (Multi-Head Self-Attention, GELU FeedForward, Pre-LayerNorm, weight tying, and FlashAttention-powered compute).
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 💻 1. How to Use Locally (Python API)
+
+You can import and generate text with Synor directly in your Python code:
+
+```python
+import torch
+from synor import SynorLM, CharTokenizer, TextSampler
+
+device = "mps" if torch.backends.mps.is_available() else "cpu"
+
+# 1. Load tokenizer and trained weights
+tokenizer = CharTokenizer.load("data/meta.pkl")
+checkpoint = torch.load("checkpoints/best_model.pt", map_location=device, weights_only=False)
+
+model = SynorLM(checkpoint["config"]).to(device)
+model.load_state_dict(checkpoint["model_state_dict"])
+
+# 2. Generate text
+sampler = TextSampler(model=model, tokenizer=tokenizer, device=device)
+output = sampler.generate(prompt="ROMEO:", max_new_tokens=200, temperature=0.8)
+print(output)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🏋️ 2. How to Train
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Add Your Training Data
+Place any `.txt` text files (literature, books, articles, code, conversations) into the `data/raw/` directory. Synor automatically scans and trains on all text files inside this folder.
 
-## Learn More
+### Train from Scratch
+```bash
+python3 train.py --config tiny --iters 1000
+```
 
-To learn more about Next.js, take a look at the following resources:
+Available presets for `--config`:
+- `tiny` (~1.8M parameters — fast on laptops and M-series Macs)
+- `small` (~10M parameters)
+- `medium` (~30M parameters)
+- `large` (~85M parameters)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Continue / Resume Training
+Training automatically preserves the AdamW optimizer state and learning rate schedule:
+```bash
+python3 train.py --resume --iters 500
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 💬 3. How to Chat & Generate Text
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Generate from a Prompt (CLI)
+```bash
+python3 generate.py --prompt "CITIZEN:" --tokens 300 --temp 0.8
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Interactive Terminal Chat
+Start a real-time conversation session with your model:
+```bash
+python3 chat.py
+```
+Type your prompt and press **Enter**. Type `exit` or `quit` to end the session.
