@@ -35,6 +35,7 @@ class TextSampler:
         top_k: Optional[int] = 40,
         top_p: Optional[float] = 0.9,
         repetition_penalty: float = 1.1,
+        stop_strings: Optional[list] = None,
         stream_callback: Optional[Callable[[str], None]] = None,
         delay_seconds: float = 0.005,
     ) -> str:
@@ -98,6 +99,12 @@ class TextSampler:
             idx = torch.cat((idx, next_token), dim=1)
 
             char = self.tokenizer.decode([token_id])
+
+            if stop_strings:
+                decoded_so_far = self.tokenizer.decode(generated_tokens)
+                if any(stop in decoded_so_far for stop in stop_strings):
+                    break
+
             if stream_callback:
                 stream_callback(char)
                 if delay_seconds > 0:

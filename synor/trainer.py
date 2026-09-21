@@ -9,6 +9,7 @@ from torch.nn.utils import clip_grad_norm_
 from synor.dataset import TextDataset
 from synor.model import SynorLM
 from synor.utils import save_checkpoint_atomic, setup_logger
+from synor.logger import chalk, log_step, log_success, log_info, log_warn
 
 logger = setup_logger("synor.trainer")
 
@@ -158,22 +159,16 @@ class Trainer:
                         self.save_checkpoint("best_model.pt")
 
                     self.save_checkpoint("latest.pt")
-
-                    star = " 🌟 (New Best!)" if is_best else ""
-                    print(
-                        f"Step {step+1:5d}/{max_iters:5d} | "
-                        f"Train: {losses['train']:.4f} | "
-                        f"Val: {val_loss:.4f} | "
-                        f"LR: {lr:.2e} | "
-                        f"Time: {dt:5.1f}s{star}"
-                    )
+                    log_step(step + 1, max_iters, losses["train"], val_loss, lr, dt, is_best=is_best)
                     t0 = time.time()
 
         except KeyboardInterrupt:
-            print("\n\n⚠️ Training interrupted by user. Safely saving checkpoint...")
+            print("\n")
+            log_warn("Training interrupted by user. Safely saving checkpoint...")
             self.save_checkpoint("latest.pt")
-            print("💾 Saved state to 'checkpoints/latest.pt'. You can resume anytime using --resume.")
+            log_success("Saved state to 'checkpoints/latest.pt'. Resume anytime using --resume.")
             sys.exit(0)
 
-        print(f"\n✅ Training completed! Best validation loss: {self.best_val_loss:.4f}")
-        print(f"💾 Checkpoints saved to: '{self.checkpoint_dir}/'")
+        print()
+        log_success(f"Training completed! Best validation loss: {self.best_val_loss:.4f}")
+        log_info(f"Checkpoints saved to: '{self.checkpoint_dir}/'")

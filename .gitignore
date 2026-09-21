@@ -49,4 +49,5 @@ env/
 venv/
 *.pt
 *.pkl
+*.bak
 !checkpoints/.gitkeep

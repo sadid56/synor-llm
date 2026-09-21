@@ -32,14 +32,17 @@ def parse_args():
     return parser.parse_args()
 
 
+from synor.logger import chalk, print_banner, log_info, log_error
+
+
 def resolve_checkpoint(checkpoint_path: str) -> str:
     if os.path.exists(checkpoint_path):
         return checkpoint_path
     fallback = "checkpoints/latest.pt"
     if os.path.exists(fallback):
         return fallback
-    print(f"❌ Error: No checkpoint found at '{checkpoint_path}' or '{fallback}'.")
-    print("👉 Train the model first by running: python3 train.py")
+    log_error(f"No checkpoint found at '{checkpoint_path}' or '{fallback}'.")
+    print(f"  {chalk.dim('👉 Train the model first:')} {chalk.bold.cyan('python3 train.py')}")
     sys.exit(1)
 
 
@@ -50,14 +53,14 @@ def main():
 
     meta_path = "data/meta.pkl"
     if not os.path.exists(meta_path):
-        print(f"❌ Error: Tokenizer metadata '{meta_path}' not found.")
-        print("👉 Run training once to generate tokenizer vocabulary.")
+        log_error(f"Tokenizer metadata '{meta_path}' not found.")
+        print(f"  {chalk.dim('👉 Run training once to generate vocabulary.')}")
         sys.exit(1)
 
     try:
         tokenizer = CharTokenizer.load(meta_path)
     except Exception as e:
-        print(f"❌ Error loading tokenizer: {e}")
+        log_error(f"Failed to load tokenizer: {e}")
         sys.exit(1)
 
     try:
@@ -67,22 +70,28 @@ def main():
         model.load_state_dict(checkpoint["model_state_dict"])
         model.eval()
     except Exception as e:
-        print(f"❌ Error loading model weights from '{checkpoint_file}': {e}")
+        log_error(f"Failed to load weights from '{checkpoint_file}': {e}")
         sys.exit(1)
 
     sampler = TextSampler(model=model, tokenizer=tokenizer, device=device)
 
-    print("=" * 60)
-    print(f"✨ Synor AI — Generation Engine (Checkpoint: {checkpoint_file})")
-    print(f"⚙️  Sampling: Temp={args.temp} | Top-K={args.top_k} | Top-P={args.top_p}")
-    print("=" * 60)
+    print_banner(
+        "Synor AI — Generation Engine",
+        "Autonomous Streaming Completion",
+        {
+            "Checkpoint": checkpoint_file,
+            "Device": str(device).upper(),
+            "Temperature": args.temp,
+            "Top-K / Top-P": f"{args.top_k} / {args.top_p}",
+        },
+    )
 
     if args.prompt:
-        sys.stdout.write(args.prompt)
+        sys.stdout.write(chalk.bold.bright_cyan(args.prompt))
         sys.stdout.flush()
 
     def stream_char(c: str):
-        sys.stdout.write(c)
+        sys.stdout.write(chalk.bright_white(c))
         sys.stdout.flush()
 
     try:
@@ -97,7 +106,7 @@ def main():
     except KeyboardInterrupt:
         pass
 
-    print("\n" + "=" * 60)
+    print(f"\n\n{chalk.dim('─' * 62)}\n")
 
 
 if __name__ == "__main__":

@@ -13,12 +13,15 @@ from synor.tokenizer import CharTokenizer
 from synor.utils import get_device
 
 
+from synor.logger import chalk, print_banner, log_error
+
+
 def resolve_checkpoint() -> str:
     for path in ["checkpoints/best_model.pt", "checkpoints/latest.pt"]:
         if os.path.exists(path):
             return path
-    print("❌ Error: No trained checkpoints found in 'checkpoints/'.")
-    print("👉 Train the model first by running: python3 train.py")
+    log_error("No trained checkpoints found in 'checkpoints/'.")
+    print(f"  {chalk.dim('👉 Train the model first:')} {chalk.bold.cyan('python3 train.py')}")
     sys.exit(1)
 
 
@@ -28,14 +31,14 @@ def main():
 
     meta_path = "data/meta.pkl"
     if not os.path.exists(meta_path):
-        print(f"❌ Error: Tokenizer metadata '{meta_path}' not found.")
-        print("👉 Train the model first to generate vocabulary.")
+        log_error(f"Tokenizer metadata '{meta_path}' not found.")
+        print(f"  {chalk.dim('👉 Train the model first to generate vocabulary.')}")
         sys.exit(1)
 
     try:
         tokenizer = CharTokenizer.load(meta_path)
     except Exception as e:
-        print(f"❌ Error loading tokenizer: {e}")
+        log_error(f"Failed to load tokenizer: {e}")
         sys.exit(1)
 
     try:
@@ -45,43 +48,60 @@ def main():
         model.load_state_dict(checkpoint["model_state_dict"])
         model.eval()
     except Exception as e:
-        print(f"❌ Error loading checkpoint '{checkpoint_path}': {e}")
+        log_error(f"Failed to load checkpoint '{checkpoint_path}': {e}")
         sys.exit(1)
 
     sampler = TextSampler(model=model, tokenizer=tokenizer, device=device)
 
-    print("=" * 60)
-    print("🤖 Welcome to Synor AI Interactive Console")
-    print(f"⚡ Device: {str(device).upper()} | Checkpoint: {checkpoint_path}")
-    print("Type your prompt and press Enter. Type 'exit' or 'quit' to end.")
-    print("=" * 60)
+    print_banner(
+        "Synor AI — Interactive Console",
+        "Real-Time Conversational REPL",
+        {
+            "Checkpoint": checkpoint_path,
+            "Compute Device": str(device).upper(),
+            "Architecture": f"{config.n_layer} Layers | {config.n_head} Heads | {config.n_embd} Dim",
+            "Controls": "Type prompt + Enter. Type 'exit' or 'quit' to end.",
+        },
+    )
 
     def stream_char(c: str):
-        sys.stdout.write(c)
+        sys.stdout.write(chalk.bright_white(c))
         sys.stdout.flush()
 
     while True:
         try:
-            prompt = input("\n👤 You: ").strip()
+            prompt_input = input(f"\n{chalk.bold.bg_magenta.white(' USER ')} ")
+            prompt = prompt_input.strip()
             if not prompt:
                 continue
             if prompt.lower() in ["exit", "quit"]:
-                print("👋 Goodbye!")
+                print(f"\n{chalk.bold.yellow('👋 Session ended. Goodbye!')}\n")
                 break
 
-            print("🧠 Synor: ", end="", flush=True)
+            # Normalize common punctuation spacing like "Who are you ?" -> "Who are you?"
+            clean_prompt = prompt.replace(" ?", "?").replace(" !", "!")
+
+            # Format prompt for conversational model
+            formatted_prompt = (
+                clean_prompt
+                if clean_prompt.startswith("User:")
+                else f"User: {clean_prompt}\nAssistant: "
+            )
+
+            print(f"{chalk.bold.bg_cyan.black(' SYNOR ')} ", end="", flush=True)
             sampler.generate(
-                prompt=prompt,
-                max_new_tokens=250,
-                temperature=0.8,
+                prompt=formatted_prompt,
+                max_new_tokens=150,
+                temperature=0.3,
                 top_k=40,
                 top_p=0.9,
+                stop_strings=["\nUser:", "\n\n", "User:"],
                 stream_callback=stream_char,
             )
             print()
 
         except (KeyboardInterrupt, EOFError):
-            print("\n👋 Session ended.")
+            print(f"\n\n{chalk.bold.yellow('👋 Session ended. Goodbye!')}\n")
             break
 
 

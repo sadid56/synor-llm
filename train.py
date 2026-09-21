@@ -66,24 +66,40 @@ def parse_args():
     return parser.parse_args()
 
 
+from synor.logger import (
+    chalk,
+    print_banner,
+    log_info,
+    log_success,
+    log_warn,
+    log_error,
+)
+
+
 def main():
     args = parse_args()
     device = get_device()
 
-    print("=" * 60)
-    print("🧠 Synor AI — Foundation Model Training Pipeline")
-    print(f"⚡ Compute Device: {str(device).upper()}")
-    print(f"📦 Preset Scale: {args.config.upper()}")
-    print("=" * 60)
+    print_banner(
+        "Synor AI — Training Pipeline",
+        "Generative Pretrained Transformer & Supervised Fine-Tuning",
+        {
+            "Compute Device": str(device).upper(),
+            "Preset Scale": args.config.upper(),
+            "Learning Rate": args.lr,
+            "Target Steps": args.iters,
+            "Batch Size": args.batch_size,
+        },
+    )
 
     # 1. Tokenizer management
     meta_path = "data/meta.pkl"
     if os.path.exists(meta_path) and args.resume:
         try:
             tokenizer = CharTokenizer.load(meta_path)
-            print(f"📖 Loaded existing vocabulary ({tokenizer.vocab_size} tokens) from {meta_path}")
+            log_info(f"Loaded existing vocabulary: {chalk.bold.yellow(f'{tokenizer.vocab_size} tokens')} from '{meta_path}'")
         except Exception as e:
-            logger.warning(f"Could not load {meta_path}: {e}. Initializing new tokenizer.")
+            log_warn(f"Could not load {meta_path}: {e}. Initializing new tokenizer.")
             tokenizer = CharTokenizer()
     else:
         tokenizer = CharTokenizer()
@@ -92,20 +108,23 @@ def main():
     try:
         dataset = TextDataset(raw_dir=args.data_dir, tokenizer=tokenizer)
     except Exception as e:
-        print(f"\n❌ Dataset Error: {e}")
+        log_error(f"Dataset Error: {e}")
         sys.exit(1)
 
     stats = dataset.stats()
-    print(f"📂 Corpus Statistics:")
-    print(f"   - Files: {stats['num_files']}")
-    print(f"   - Total characters: {stats['total_chars']:,}")
-    print(f"   - Total tokens: {stats['total_tokens']:,}")
-    print(f"   - Vocabulary size: {stats['vocab_size']}")
+    n_files = stats["num_files"]
+    t_chars = stats["total_chars"]
+    v_size = stats["vocab_size"]
+    log_info(
+        f"Corpus Loaded: {chalk.bold.yellow(f'{n_files} file(s)')} | "
+        f"{chalk.bold.white(f'{t_chars:,}')} chars | "
+        f"Vocab: {chalk.bold.cyan(str(v_size))}"
+    )
 
     try:
         tokenizer.save(meta_path)
     except Exception as e:
-        logger.warning(f"Could not save tokenizer to {meta_path}: {e}")
+        log_warn(f"Could not save tokenizer to {meta_path}: {e}")
 
     # 3. Model instantiation
     preset = get_preset(args.config)
@@ -119,7 +138,7 @@ def main():
     )
 
     model = SynorLM(config)
-    print(f"🧩 Model Architecture: {model.get_num_params():,} trainable parameters")
+    log_info(f"Model Initialized: {chalk.bold.bright_green(f'{model.get_num_params():,}')} trainable parameters")
 
     # 4. Trainer execution
     trainer = Trainer(
@@ -132,22 +151,24 @@ def main():
 
     if args.resume:
         if trainer.load_checkpoint("latest.pt"):
-            print(
-                f"🔄 Resumed from 'checkpoints/latest.pt' at Step {trainer.iter_num:,} "
-                f"(Best Val Loss: {trainer.best_val_loss:.4f})"
+            log_success(
+                f"Resumed from 'checkpoints/latest.pt' at Step {chalk.bold.white(f'{trainer.iter_num:,}')} "
+                f"(Best Val Loss: {chalk.bold.green(f'{trainer.best_val_loss:.4f}')})"
             )
         else:
-            print("ℹ️  No valid checkpoint found in 'checkpoints/latest.pt'. Training from scratch.")
+            log_info("No existing checkpoint found in 'checkpoints/latest.pt'. Training from scratch.")
 
+    print(f"\n{chalk.bold.cyan('─' * 62)}")
     trainer.train(
         additional_iters=args.iters,
         batch_size=args.batch_size,
         eval_interval=args.eval_interval,
     )
+    print(f"{chalk.bold.cyan('─' * 62)}\n")
 
-    print("\n🎉 Training finished!")
-    print("👉 Generate text: python3 generate.py --prompt 'ROMEO:'")
-    print("👉 Chat with AI:  python3 chat.py")
+    log_success("Training pipeline finished successfully!")
+    print(f"  {chalk.dim('👉 Run chat:')}     {chalk.bold.cyan('python3 chat.py')}")
+    print(f"  {chalk.dim('👉 Generate:')}     {chalk.bold.cyan('python3 generate.py --prompt \"User: Hi\"')}\n")
 
 
 if __name__ == "__main__":

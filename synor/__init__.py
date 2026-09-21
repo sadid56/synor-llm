@@ -9,6 +9,15 @@ from synor.dataset import TextDataset
 from synor.trainer import Trainer
 from synor.sampler import TextSampler
 from synor.utils import get_device, save_checkpoint_atomic, setup_logger
+from synor.logger import (
+    chalk,
+    print_banner,
+    log_info,
+    log_success,
+    log_warn,
+    log_error,
+    log_step,
+)
 
 # Aliases for backward compatibility
 MiniGPT = SynorLM
@@ -31,4 +40,11 @@ __all__ = [
     "get_device",
     "save_checkpoint_atomic",
     "setup_logger",
+    "chalk",
+    "print_banner",
+    "log_info",
+    "log_success",
+    "log_warn",
+    "log_error",
+    "log_step",
 ]
