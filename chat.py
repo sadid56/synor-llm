@@ -95,12 +95,12 @@ def main():
                 search_results = search_engine.search(search_query)
 
                 if search_results:
-                    print(f"\r  {chalk.bold.bg_blue.white(' DUCKDUCKGO ')} {chalk.dim('Live Web Retrieval')}               ")
+                    print(f"\r\033[K  {chalk.bold.bg_blue.white(' DUCKDUCKGO ')} {chalk.dim('Live Web Retrieval')}")
                     print(f"{chalk.bold.bg_cyan.black(' SYNOR ')} {chalk.bright_white(search_results)}\n")
                     continue
                 else:
                     # Honest admission of not knowing
-                    print(f"\r  {chalk.bold.bg_yellow.black(' DUCKDUCKGO ')} {chalk.dim('No verified web results found')}       ")
+                    print(f"\r\033[K  {chalk.bold.bg_yellow.black(' DUCKDUCKGO ')} {chalk.dim('No verified web results found')}")
                     print(
                         f"{chalk.bold.bg_cyan.black(' SYNOR ')} "
                         f"{chalk.yellow('আমি এই প্রশ্নের উত্তর জানি না এবং ইন্টারনেটেও খুঁজে পাইনি। (I do not know this and could not find it online.)')}\n"
