@@ -1,19 +1,13 @@
-import sys
 import time
 from typing import Callable, Optional
 import torch
 from torch.nn import functional as F
 
-from synor.model import SynorLM
+from synor.model import SynorLM, KVCache
 from synor.tokenizer import BaseTokenizer
 
 
 class TextSampler:
-    """
-    High-performance text generation and sampling engine for Synor.
-    Supports temperature scaling, Top-K, Top-P (nucleus), and repetition penalty.
-    """
-
     def __init__(
         self,
         model: SynorLM,
@@ -45,21 +39,15 @@ class TextSampler:
         else:
             idx = torch.zeros((1, 1), dtype=torch.long, device=self.device)
 
+        kv_cache = KVCache(len(self.model.blocks))
+        logits, _ = self.model(idx, start_pos=0, kv_cache=kv_cache)
+        next_token_logits = logits[:, -1, :].clone()
+        start_pos = idx.size(1)
+
         generated_tokens = []
         stream_buffer = ""
 
         for _ in range(max_new_tokens):
-            # Crop to block_size if sequence exceeds context window
-            idx_cond = (
-                idx
-                if idx.size(1) <= self.model.config.block_size
-                else idx[:, -self.model.config.block_size :]
-            )
-
-            logits, _ = self.model(idx_cond)
-            next_token_logits = logits[:, -1, :].clone()
-
-            # Apply repetition penalty to recently generated tokens
             if repetition_penalty != 1.0 and len(generated_tokens) > 0:
                 for token_id in set(generated_tokens[-30:]):
                     if next_token_logits[0, token_id] < 0:
@@ -67,18 +55,15 @@ class TextSampler:
                     else:
                         next_token_logits[0, token_id] /= repetition_penalty
 
-            # Greedy decoding if temperature is near zero
             if temperature < 1e-4:
                 next_token = torch.argmax(next_token_logits, dim=-1, keepdim=True)
             else:
                 next_token_logits = next_token_logits / temperature
 
-                # Top-K filtering
                 if top_k is not None and top_k > 0:
                     v, _ = torch.topk(next_token_logits, min(top_k, next_token_logits.size(-1)))
                     next_token_logits[next_token_logits < v[:, [-1]]] = -float("Inf")
 
-                # Top-P (nucleus) filtering
                 if top_p is not None and 0.0 < top_p < 1.0:
                     sorted_logits, sorted_indices = torch.sort(next_token_logits, descending=True)
                     cumulative_probs = torch.cumsum(F.softmax(sorted_logits, dim=-1), dim=-1)
@@ -113,49 +98,29 @@ class TextSampler:
                         before_stop = stream_buffer.split(stop)[0]
                         if before_stop:
                             stream_callback(before_stop)
-                        stream_buffer = ""
                         should_stop = True
                         break
                 if should_stop:
                     break
-
-                # Check if suffix of stream_buffer is a prefix of any stop string
-                overlap = 0
-                if stop_strings:
-                    for length in range(len(stream_buffer), 0, -1):
-                        suffix = stream_buffer[-length:]
-                        if any(s.startswith(suffix) for s in stop_strings):
-                            overlap = length
-                            break
-
-                if overlap > 0:
-                    to_emit = stream_buffer[:-overlap]
-                    stream_buffer = stream_buffer[-overlap:]
-                else:
-                    to_emit = stream_buffer
-                    stream_buffer = ""
-
-                if to_emit:
-                    if to_emit.endswith("\n\n\n"):
-                        break
-                    stream_callback(to_emit)
-                    if delay_seconds > 0:
-                        time.sleep(delay_seconds)
-            elif stop_strings:
-                decoded_so_far = self.tokenizer.decode(generated_tokens)
-                if any(stop in decoded_so_far for stop in stop_strings):
+                stream_callback(char)
+                if delay_seconds > 0:
+                    time.sleep(delay_seconds)
+            else:
+                stream_buffer += char
+                if any(stop in stream_buffer for stop in (stop_strings or [])):
                     break
 
-        # Flush any remaining buffer if not stopped by a stop string
-        if stream_callback and stream_buffer:
-            if not any(stop in stream_buffer for stop in (stop_strings or [])):
-                stream_callback(stream_buffer)
+            if start_pos >= self.model.config.block_size * 2:
+                break
+
+            logits, _ = self.model(next_token, start_pos=start_pos, kv_cache=kv_cache)
+            next_token_logits = logits[:, -1, :].clone()
+            start_pos += 1
 
         full_output = self.tokenizer.decode(generated_tokens)
         if stop_strings:
             for stop in stop_strings:
                 if stop in full_output:
                     full_output = full_output.split(stop)[0]
-        import re
-        full_output = re.sub(r'\n{3,}', '\n\n', full_output)
+
         return full_output

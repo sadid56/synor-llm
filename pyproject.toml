@@ -1,14 +1,27 @@
 [project]
 name = "synor"
-version = "0.1.0"
-description = "Synor: An organic, from-scratch generative AI foundation model"
+version = "0.2.0"
+description = "Synor: Native SOTA Foundation Model & Assistant Engine"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 dependencies = [
     "torch>=2.2.0",
+    "tiktoken>=0.7.0",
+    "fastapi>=0.110.0",
+    "uvicorn>=0.28.0",
+    "pydantic>=2.6.0",
     "tqdm>=4.66.0",
     "requests>=2.31.0",
 ]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
 
 [build-system]
 requires = ["hatchling"]

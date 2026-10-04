@@ -187,16 +187,8 @@ def main():
         log_warn(f"Could not save tokenizer to {meta_path}: {e}")
 
     # 3. Model instantiation
-    preset = get_preset(args.config)
-    config = SynorConfig(
-        vocab_size=tokenizer.vocab_size,
-        block_size=preset.block_size,
-        n_embd=preset.n_embd,
-        n_head=preset.n_head,
-        n_layer=preset.n_layer,
-        dropout=preset.dropout,
-    )
-
+    config = get_preset(args.config)
+    config.vocab_size = tokenizer.vocab_size
     model = SynorLM(config)
     log_info(f"Model Initialized: {chalk.bold.bright_green(f'{model.get_num_params():,}')} trainable parameters")
 
@@ -229,7 +221,8 @@ def main():
 
     log_success("Training pipeline finished successfully!")
     print(f"  {chalk.dim('👉 Run chat:')}     {chalk.bold.cyan('python3 chat.py')}")
-    print(f"  {chalk.dim('👉 Generate:')}     {chalk.bold.cyan('python3 generate.py --prompt \"User: Hi\"')}\n")
+    gen_cmd = chalk.bold.cyan('python3 generate.py --prompt "User: Hi"')
+    print(f"  {chalk.dim('👉 Generate:')}     {gen_cmd}\n")
 
 
 if __name__ == "__main__":
