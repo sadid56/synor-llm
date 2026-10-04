@@ -72,7 +72,13 @@ def parse_args():
     parser.add_argument(
         "--resume",
         action="store_true",
-        help="Resume training from 'checkpoints/latest.pt' if it exists",
+        default=True,
+        help="Resume training from 'checkpoints/latest.pt' if it exists (default: True)",
+    )
+    parser.add_argument(
+        "--fresh",
+        action="store_true",
+        help="Force training from scratch (ignore existing checkpoints)",
     )
     parser.add_argument(
         "--data-dir",
@@ -201,7 +207,7 @@ def main():
         checkpoint_dir="checkpoints",
     )
 
-    if args.resume:
+    if args.resume and not args.fresh:
         if trainer.load_checkpoint("latest.pt"):
             log_success(
                 f"Resumed from 'checkpoints/latest.pt' at Step {chalk.bold.white(f'{trainer.iter_num:,}')} "
@@ -209,6 +215,8 @@ def main():
             )
         else:
             log_info("No existing checkpoint found in 'checkpoints/latest.pt'. Training from scratch.")
+    elif args.fresh:
+        log_warn("Forced training from scratch (--fresh). Existing checkpoints ignored.")
 
     print(f"\n{chalk.bold.cyan('─' * 62)}")
     trainer.train(
