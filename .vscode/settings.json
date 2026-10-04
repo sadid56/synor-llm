@@ -1,17 +1,3 @@
 {
-  "cSpell.words": [
-    "accum",
-    "allclose",
-    "DUCKDUCKGO",
-    "embd",
-    "freqs",
-    "GELU",
-    "keepdim",
-    "randn",
-    "resid",
-    "rmsnorm",
-    "swiglu",
-    "Synor",
-    "tril"
-  ]
+  "cSpell.words": ["accum", "allclose", "DUCKDUCKGO", "embd", "freqs", "GELU", "keepdim", "randn", "resid", "rmsnorm", "silu", "swiglu", "Synor", "tril"]
 }

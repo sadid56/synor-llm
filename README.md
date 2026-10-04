@@ -1,6 +1,6 @@
 # 🧠 Synor AI — 100M SOTA Foundation Model
 
-**Synor** is a from-scratch, native 100 Million Parameter (`101,528,064`) Generative Pretrained Transformer (Causal Decoder LLM) built in Python and PyTorch. It features a modern SOTA architecture (RoPE, RMSNorm, SwiGLU, GQA, and KV-Cache) with zero third-party pre-trained weights and zero static heuristics.
+**Synor** is a from-scratch, native 100 Million Parameter (`101,528,064`) Generative Pretrained Transformer (Causal Decoder LLM) built in Python and PyTorch. It features a modern SOTA architecture (RoPE, RMSNorm, SwiGLU, GQA, and KV-Cache) optimized for extreme speed and efficiency on standard hardware, Apple Silicon, and CUDA.
 
 ---
 
@@ -64,7 +64,7 @@ pytest
 ## 🏋️ Two-Stage Foundation Training Pipeline
 
 ### Stage 1: Broad Pre-Training (Causal Next-Token Prediction)
-Trains the model on extensive encyclopedic knowledge and text corpora:
+Trains the model across extensive encyclopedic knowledge corpora:
 ```bash
 python3 train.py --config 100m --stage pretrain --iters 1000 --batch-size 4 --grad-accum-steps 2 --lr 3e-4
 ```
@@ -72,5 +72,5 @@ python3 train.py --config 100m --stage pretrain --iters 1000 --batch-size 4 --gr
 ### Stage 2: Instruction SFT (Supervised Fine-Tuning with Masked Target Loss)
 Trains the model as an articulate personal assistant. User prompts are masked with `-100` so cross-entropy loss trains exclusively on Assistant responses:
 ```bash
-python3 train.py --config 100m --stage sft --iters 2000 --batch-size 4 --grad-accum-steps 2 --lr 1e-4 --resume
+python3 train.py --config 100m --stage sft --iters 2000 --batch-size 4 --grad-accum-steps 2 --lr 1e-4
 ```

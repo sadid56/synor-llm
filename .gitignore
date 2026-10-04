@@ -50,4 +50,7 @@ venv/
 *.pt
 *.pkl
 *.bak
+*.tmp
+checkpoints/*.tmp
+checkpoints/*.pt
 !checkpoints/.gitkeep

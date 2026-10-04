@@ -122,22 +122,71 @@ class CausalSelfAttention(nn.Module):
         return self.resid_dropout(self.out_proj(y))
 
 
-class FeedForward(nn.Module):
-    def __init__(self, config: SynorConfig):
+class SwiGLUExpert(nn.Module):
+    def __init__(self, dim_or_config, hidden_dim: Optional[int] = None, bias: bool = False, dropout: float = 0.0):
         super().__init__()
-        if config.hidden_dim is None:
-            hidden_dim = int(2 * (4 * config.n_embd) / 3)
-            hidden_dim = 64 * ((hidden_dim + 63) // 64)
+        if isinstance(dim_or_config, SynorConfig):
+            cfg = dim_or_config
+            dim = cfg.n_embd
+            hidden_dim = cfg.hidden_dim or int(2 * (4 * dim) / 3)
+            bias = cfg.bias
+            dropout = cfg.dropout
         else:
-            hidden_dim = config.hidden_dim
-
-        self.w1 = nn.Linear(config.n_embd, hidden_dim, bias=config.bias)
-        self.w2 = nn.Linear(hidden_dim, config.n_embd, bias=config.bias)
-        self.w3 = nn.Linear(config.n_embd, hidden_dim, bias=config.bias)
-        self.dropout = nn.Dropout(config.dropout)
+            dim = dim_or_config
+            if hidden_dim is None:
+                hidden_dim = int(2 * (4 * dim) / 3)
+        self.w1 = nn.Linear(dim, hidden_dim, bias=bias)
+        self.w2 = nn.Linear(hidden_dim, dim, bias=bias)
+        self.w3 = nn.Linear(dim, hidden_dim, bias=bias)
+        self.dropout = nn.Dropout(dropout)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.dropout(self.w2(F.silu(self.w1(x)) * self.w3(x)))
+
+
+class MoELayer(nn.Module):
+    def __init__(self, config: SynorConfig):
+        super().__init__()
+        self.num_experts = config.num_experts
+        self.top_k = config.num_experts_per_tok
+        dim = config.n_embd
+        hidden_dim = config.hidden_dim or int(2 * (4 * dim) / 3)
+
+        self.gate = nn.Linear(dim, self.num_experts, bias=False)
+        self.experts = nn.ModuleList([
+            SwiGLUExpert(dim, hidden_dim, bias=config.bias, dropout=config.dropout)
+            for _ in range(self.num_experts)
+        ])
+        self.shared_expert = SwiGLUExpert(dim, hidden_dim, bias=config.bias, dropout=config.dropout)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        b, t, d = x.shape
+        x_flat = x.view(-1, d)
+
+        # Shared expert processes all tokens
+        shared_out = self.shared_expert(x_flat)
+
+        # Router calculates top-k expert weights
+        router_logits = self.gate(x_flat)
+        weights, indices = torch.topk(router_logits, self.top_k, dim=-1)
+        weights = F.softmax(weights, dim=-1)
+
+        # Accumulate routed expert outputs
+        routed_out = torch.zeros_like(x_flat)
+        for k in range(self.top_k):
+            exp_idx = indices[:, k]
+            weight = weights[:, k].unsqueeze(-1)
+            for e_id in range(self.num_experts):
+                mask = (exp_idx == e_id)
+                if mask.any():
+                    token_slice = x_flat[mask]
+                    routed_out[mask] += weight[mask] * self.experts[e_id](token_slice)
+
+        final_out = (shared_out + routed_out).view(b, t, d)
+        return final_out
+
+
+FeedForward = SwiGLUExpert
 
 
 class Block(nn.Module):
@@ -147,7 +196,12 @@ class Block(nn.Module):
         self.attn_norm = RMSNorm(config.n_embd, eps=config.norm_eps)
         self.attn = CausalSelfAttention(config)
         self.ffn_norm = RMSNorm(config.n_embd, eps=config.norm_eps)
-        self.mlp = FeedForward(config)
+        
+        if config.use_moe:
+            self.mlp = MoELayer(config)
+        else:
+            hidden_dim = config.hidden_dim or int(2 * (4 * config.n_embd) / 3)
+            self.mlp = SwiGLUExpert(config.n_embd, hidden_dim, bias=config.bias, dropout=config.dropout)
 
     def forward(
         self,

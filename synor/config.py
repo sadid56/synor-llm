@@ -15,6 +15,9 @@ class SynorConfig:
     bias: bool = False
     norm_eps: float = 1e-5
     rope_theta: float = 10000.0
+    num_experts: int = 8
+    num_experts_per_tok: int = 2
+    use_moe: bool = False
 
     def validate(self) -> None:
         if self.n_embd % self.n_head != 0:
@@ -25,6 +28,8 @@ class SynorConfig:
             raise ValueError(f"vocab_size must be positive, got {self.vocab_size}")
         if self.block_size <= 0:
             raise ValueError(f"block_size must be positive, got {self.block_size}")
+        if self.use_moe and self.num_experts_per_tok > self.num_experts:
+            raise ValueError("num_experts_per_tok cannot exceed num_experts")
 
 
 PRESETS: Dict[str, SynorConfig] = {
@@ -35,8 +40,9 @@ PRESETS: Dict[str, SynorConfig] = {
         n_head=6,
         n_kv_head=2,
         n_layer=4,
-        hidden_dim=512,
+        hidden_dim=384,
         dropout=0.0,
+        use_moe=False,
     ),
     "small": SynorConfig(
         block_size=256,
@@ -45,8 +51,9 @@ PRESETS: Dict[str, SynorConfig] = {
         n_head=6,
         n_kv_head=2,
         n_layer=6,
-        hidden_dim=1024,
+        hidden_dim=768,
         dropout=0.0,
+        use_moe=False,
     ),
     "medium": SynorConfig(
         block_size=512,
@@ -55,8 +62,9 @@ PRESETS: Dict[str, SynorConfig] = {
         n_head=8,
         n_kv_head=4,
         n_layer=8,
-        hidden_dim=1376,
+        hidden_dim=1024,
         dropout=0.0,
+        use_moe=False,
     ),
     "large": SynorConfig(
         block_size=1024,
@@ -65,8 +73,9 @@ PRESETS: Dict[str, SynorConfig] = {
         n_head=12,
         n_kv_head=4,
         n_layer=12,
-        hidden_dim=2048,
+        hidden_dim=1536,
         dropout=0.0,
+        use_moe=False,
     ),
     "100m": SynorConfig(
         block_size=512,
@@ -77,6 +86,7 @@ PRESETS: Dict[str, SynorConfig] = {
         n_layer=10,
         hidden_dim=2048,
         dropout=0.0,
+        use_moe=False,
     ),
 }
 
