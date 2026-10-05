@@ -170,13 +170,21 @@ def download_dataset(url: str, output_path: str, is_sft: bool = True):
     print(f"\n\n✅ Done! Downloaded {mb:.1f} MB ({sample_count:,} records)")
     print(f"📁 Saved to: {output_path}")
 
-    # Invalidate old SFT cache if saving into data/sft
+    # Invalidate old caches
     if "data/sft" in output_path:
         cache_path = "data/sft/sft_cache.pt"
         if os.path.exists(cache_path):
             try:
                 os.remove(cache_path)
                 print("🔄 Removed old 'sft_cache.pt' cache to ensure new dataset is tokenized.")
+            except Exception:
+                pass
+    elif "data/pretrain" in output_path:
+        cache_path = "data/pretrain/pretrain_cache.pt"
+        if os.path.exists(cache_path):
+            try:
+                os.remove(cache_path)
+                print("🔄 Removed old 'pretrain_cache.pt' cache to ensure new pretrain dataset is tokenized.")
             except Exception:
                 pass
 

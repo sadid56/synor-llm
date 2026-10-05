@@ -54,3 +54,13 @@ venv/
 checkpoints/*.tmp
 checkpoints/*.pt
 !checkpoints/.gitkeep
+
+# datasets (large text corpora & binary caches)
+data/pretrain/
+data/sft/*.txt
+!data/sft/dev_companion.txt
+!data/sft/friendly_companion.txt
+!data/sft/dolly_15k_assistant.txt
+data/*.pt
+data/*.bin
+*.cache.pt

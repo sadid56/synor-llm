@@ -32,30 +32,59 @@ class TextDataset:
         self.data_dir = data_dir
         self.raw_dir = data_dir
 
-        raw_texts = []
-        for path in self.txt_files:
-            try:
-                with open(path, "r", encoding="utf-8", errors="replace") as f:
-                    content = f.read()
-                    if content.strip():
-                        raw_texts.append(content)
-            except Exception as e:
-                raise IOError(f"Error reading file '{path}': {e}") from e
-
-        if not raw_texts:
-            raise ValueError(f"All .txt files in '{raw_dir}' are empty.")
-
-        self.full_text = "\n\n".join(raw_texts)
-
         if tokenizer is None:
             raise ValueError("Tokenizer instance must be provided to TextDataset.")
         self.tokenizer = tokenizer
 
-        if getattr(self.tokenizer, "vocab_size", 0) == 0 and hasattr(self.tokenizer, "fit"):
-            self.tokenizer.fit(self.full_text)
+        if os.path.isfile(data_dir):
+            cache_file = data_dir + ".cache.pt"
+        else:
+            cache_file = os.path.join(data_dir, "pretrain_cache.pt")
 
-        tokens = self.tokenizer.encode(self.full_text)
-        self.data_tensor = torch.tensor(tokens, dtype=torch.long)
+        use_cache = False
+        if os.path.exists(cache_file):
+            cache_mtime = os.path.getmtime(cache_file)
+            if all(os.path.getmtime(p) <= cache_mtime for p in self.txt_files):
+                use_cache = True
+
+        if use_cache:
+            try:
+                cached = torch.load(cache_file, map_location="cpu", weights_only=False)
+                self.data_tensor = cached["data_tensor"]
+                self.total_chars = cached.get("total_chars", 0)
+            except Exception:
+                use_cache = False
+
+        if not use_cache:
+            raw_texts = []
+            for path in self.txt_files:
+                try:
+                    with open(path, "r", encoding="utf-8", errors="replace") as f:
+                        content = f.read()
+                        if content.strip():
+                            raw_texts.append(content)
+                except Exception as e:
+                    raise IOError(f"Error reading file '{path}': {e}") from e
+
+            if not raw_texts:
+                raise ValueError(f"All .txt files in '{data_dir}' are empty.")
+
+            self.full_text = "\n\n".join(raw_texts)
+            self.total_chars = len(self.full_text)
+
+            if getattr(self.tokenizer, "vocab_size", 0) == 0 and hasattr(self.tokenizer, "fit"):
+                self.tokenizer.fit(self.full_text)
+
+            tokens = self.tokenizer.encode(self.full_text)
+            self.data_tensor = torch.tensor(tokens, dtype=torch.long)
+
+            try:
+                torch.save(
+                    {"data_tensor": self.data_tensor, "total_chars": self.total_chars},
+                    cache_file,
+                )
+            except Exception:
+                pass
 
         split_idx = int(len(self.data_tensor) * train_split)
         self.train_data = self.data_tensor[:split_idx]
@@ -84,7 +113,7 @@ class TextDataset:
 
     def stats(self) -> Dict[str, int]:
         return {
-            "total_chars": len(self.full_text),
+            "total_chars": getattr(self, "total_chars", len(getattr(self, "full_text", ""))),
             "total_tokens": len(self.data_tensor),
             "train_tokens": len(self.train_data),
             "val_tokens": len(self.val_data),

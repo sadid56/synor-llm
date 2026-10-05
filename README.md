@@ -77,8 +77,18 @@ pytest tests/
 
 ## 🏋️ Training Pipeline
 
-### Supervised Fine-Tuning (SFT / Masked Loss)
-Trains the model as an articulate assistant using datasets in `data/sft/`. User prompts are masked with `-100` so loss trains exclusively on Assistant responses:
+### Stage 1: Foundational Pre-training (Causal LM)
+Trains the base neural network from scratch on pure text & code corpora (`data/pretrain/`) using next-token autoregressive prediction. This builds vocabulary comprehension, grammar, programming concepts, and reasoning:
+```bash
+# 1. Download and build optimal pretraining corpora (code, reasoning, bilingual dev)
+python3 scripts/build_optimal_pretrain.py
+
+# 2. Run Stage 1 Pre-training
+python3 train.py --config 100m --stage pretrain --iters 5000 --batch-size 4 --grad-accum-steps 2 --lr 3e-4
+```
+
+### Stage 2: Supervised Fine-Tuning (SFT / Dialogue Alignment)
+Aligns the pre-trained base model into an empathetic, highly capable developer companion using dialogue pairs in `data/sft/`. User prompts are masked with `-100` so loss trains exclusively on Assistant responses:
 ```bash
 python3 train.py --config 100m --stage sft --iters 5000 --batch-size 4 --grad-accum-steps 2 --lr 1e-4
 ```
