@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
 Synor AI — Autonomous Interactive Console REPL.
-100% Pure Neural Generation + Latent Emotional State + Continual Auto-Learning.
-No static if/elif rule conditions.
+100% Pure Neural Vanilla Transformer Generation.
+Direct autoregressive decoding from model weights.
 """
 
 import os
@@ -15,18 +15,15 @@ from synor.tokenizer import BaseTokenizer, CharTokenizer, load_tokenizer
 from synor.utils import get_device
 from synor.logger import chalk, print_banner, log_info, log_success, log_error
 
-from synor.emotion import EmotionalState
-from synor.search import search_engine, should_search_web, clean_search_query
-
 
 def resolve_checkpoint() -> str:
-    paths = ["checkpoints/best_model.pt", "checkpoints/latest.pt"]
-    existing = [p for p in paths if os.path.exists(p)]
-    if not existing:
-        log_error("No trained checkpoints found in 'checkpoints/'.")
-        print(f"  {chalk.dim('👉 Train the model first:')} {chalk.bold.cyan('python3 train.py')}")
-        sys.exit(1)
-    return max(existing, key=os.path.getmtime)
+    if os.path.exists("checkpoints/best_model.pt"):
+        return "checkpoints/best_model.pt"
+    if os.path.exists("checkpoints/latest.pt"):
+        return "checkpoints/latest.pt"
+    log_error("No trained checkpoints found in 'checkpoints/'.")
+    print(f"  {chalk.dim('👉 Train the model first:')} {chalk.bold.cyan('python3 train.py')}")
+    sys.exit(1)
 
 
 def main():
@@ -56,16 +53,15 @@ def main():
         sys.exit(1)
 
     sampler = TextSampler(model=model, tokenizer=tokenizer, device=device)
-    emotion = EmotionalState()
 
     print_banner(
-        "Synor AI — Autonomous Neural Companion",
-        "Pure Autoregressive Transformer + Latent Emotion + Web Grounding",
+        "Synor AI — Pure Neural Companion",
+        "Pure Autoregressive Transformer Generation (Vanilla Brain)",
         {
             "Checkpoint": checkpoint_path,
             "Compute Device": str(device).upper(),
-            "Architecture": f"{model.get_num_params():,} Parameters (Pure Neural + Hybrid Web Search)",
-            "Commands": "/search <query> │ clear (clear screen) │ /mood (emotion) │ exit",
+            "Architecture": f"{model.get_num_params():,} Parameters (Zero Heuristics)",
+            "Commands": "clear (clear screen) │ exit (quit)",
         },
     )
 
@@ -81,7 +77,7 @@ def main():
                 continue
 
             # Command: exit / quit
-            if prompt.lower() in ["exit", "quit"]:
+            if prompt.lower() in ["exit", "quit", "/exit", "/quit"]:
                 print(f"\n{chalk.bold.yellow('👋 Session ended. Catch you later, bro!')}\n")
                 break
 
@@ -90,28 +86,9 @@ def main():
                 os.system("clear" if os.name != "nt" else "cls")
                 continue
 
-            # Command: /mood or /emotion
-            if prompt.lower() in ["/mood", "/emotion"]:
-                print(f"  {chalk.bold.bg_blue.white(' EMOTION ')} {chalk.cyan(emotion.summary())}")
-                print(f"  {chalk.dim('Conditioning: ' + emotion.get_conditioning_prompt())}\n")
-                continue
-
-            # 1. Web Search Check (for real-world, factual, or real-time knowledge)
-            if prompt.lower().startswith(("/search", "search ", "google ")) or should_search_web(prompt):
-                query = clean_search_query(prompt)
-                print(f"  {chalk.dim('🌐 [Searching DuckDuckGo & Wikipedia for facts...]')}")
-                search_res = search_engine.search(query)
-                if search_res:
-                    print(f"{chalk.bold.bg_cyan.black(' SYNOR ')} {chalk.bright_white(search_res)}\n")
-                    continue
-
-            # 2. Update continuous emotional manifold from interaction dynamics
-            emotion.update_from_interaction(prompt)
-
-            # 3. Build clean prompt
+            # Format dialogue prompt for pure neural generation
             formatted_prompt = f"User: {prompt}\nAssistant: "
 
-            # 3. Pure Neural Generation from Transformer Weights
             print(f"{chalk.bold.bg_cyan.black(' SYNOR ')} ", end="", flush=True)
 
             generated_reply = sampler.generate(
