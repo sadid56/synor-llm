@@ -12,24 +12,25 @@ class TextDataset:
 
     def __init__(
         self,
-        raw_dir: str = "data/raw",
+        data_dir: str = "data/pretrain",
         tokenizer: Optional[BaseTokenizer] = None,
         train_split: float = 0.9,
     ):
-        if not os.path.exists(raw_dir):
-            raise FileNotFoundError(f"Data directory '{raw_dir}' does not exist.")
+        if not os.path.exists(data_dir):
+            raise FileNotFoundError(f"Data directory '{data_dir}' does not exist.")
 
-        if os.path.isfile(raw_dir):
-            txt_files = [raw_dir]
+        if os.path.isfile(data_dir):
+            txt_files = [data_dir]
         else:
-            txt_files = sorted(glob.glob(os.path.join(raw_dir, "*.txt")))
+            txt_files = sorted(glob.glob(os.path.join(data_dir, "*.txt")))
         if not txt_files:
             raise FileNotFoundError(
-                f"No .txt files found in '{raw_dir}'. Please add training corpora."
+                f"No .txt files found in '{data_dir}'. Please add training corpora."
             )
 
         self.txt_files = txt_files
-        self.raw_dir = raw_dir
+        self.data_dir = data_dir
+        self.raw_dir = data_dir
 
         raw_texts = []
         for path in self.txt_files:

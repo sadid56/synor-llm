@@ -41,9 +41,9 @@ def parse_args():
     parser.add_argument(
         "--stage",
         type=str,
-        default="pretrain",
+        default="sft",
         choices=["pretrain", "sft"],
-        help="Training stage: pretrain (next-token on corpus) or sft (dialogue with masked target loss)",
+        help="Training stage: sft (dialogue with masked target loss) or pretrain (next-token on corpus)",
     )
     parser.add_argument(
         "--iters",
@@ -119,9 +119,6 @@ def main():
     device = get_device()
 
     active_dir = args.sft_dir if args.stage == "sft" else args.data_dir
-    if not os.path.exists(active_dir):
-        if args.stage == "pretrain" and os.path.exists("data/raw"):
-            active_dir = "data/raw"
 
     print_banner(
         "Synor AI — 100M Foundation Training Pipeline",
