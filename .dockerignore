@@ -1,0 +1,11 @@
+.venv/
+env/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.git/
+.gitignore
+.DS_Store
+data/pretrain/
+tests/

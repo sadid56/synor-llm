@@ -1,3 +1,13 @@
+---
+title: Synor AI
+emoji: 🧠
+colorFrom: indigo
+colorTo: purple
+sdk: docker
+app_port: 7860
+pinned: false
+---
+
 # 🧠 Synor AI — 100M SOTA Foundation Model
 
 **Synor** is a from-scratch, native 100 Million Parameter (`101,528,064`) Generative Pretrained Transformer (Causal Decoder LLM) built in Python and PyTorch with zero third-party base models or proprietary APIs. 

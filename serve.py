@@ -8,9 +8,8 @@ from typing import AsyncGenerator, List, Optional
 import torch
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, RedirectResponse
 from pydantic import BaseModel, Field
-
 from synor.config import get_preset
 from synor.model import SynorLM
 from synor.bpe_tokenizer import BPETokenizer
@@ -58,6 +57,16 @@ def load_model(checkpoint_path: str = "checkpoints/best_model.pt", config_name: 
 
     model = SynorLM(cfg).to(device)
 
+    if not os.path.exists(checkpoint_path) and os.environ.get("HF_MODEL_REPO"):
+        try:
+            from huggingface_hub import hf_hub_download
+            repo_id = os.environ.get("HF_MODEL_REPO")
+            filename = os.environ.get("HF_MODEL_FILE", "best_model.pt")
+            print(f"Downloading checkpoint from Hugging Face Hub: {repo_id}/{filename}...")
+            checkpoint_path = hf_hub_download(repo_id=repo_id, filename=filename)
+        except Exception as e:
+            print(f"Failed to download from HF hub: {e}")
+
     if os.path.exists(checkpoint_path):
         ckpt = torch.load(checkpoint_path, map_location=device, weights_only=False)
         state_dict = ckpt.get("model_state_dict", ckpt.get("model", ckpt))
@@ -68,6 +77,18 @@ def load_model(checkpoint_path: str = "checkpoints/best_model.pt", config_name: 
 
     model.eval()
     sampler = TextSampler(model, tokenizer, device)
+
+
+@app.on_event("startup")
+def startup_event():
+    if model is None:
+        ckpt = os.environ.get("CHECKPOINT_PATH", "checkpoints/best_model.pt")
+        load_model(checkpoint_path=ckpt)
+
+
+@app.get("/")
+def root():
+    return RedirectResponse(url="/docs")
 
 
 @app.get("/health")
